@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "image-luminescence"
-version = "1.0.0"
+version = "1.1.0"
 description = "Make images glow on HDR displays: Ultra HDR gain-map JPEGs and Rec.2020 PQ PNGs, colors preserved exactly"
 readme = "README.md"
 license = { text = "MIT" }

@@ -9,10 +9,9 @@
 class ImageLuminescence < Formula
   desc "Make images glow on HDR displays; colors preserved exactly"
   homepage "https://kwicz.github.io/image-luminescence/"
-  url "https://github.com/kwicz/image-luminescence/archive/refs/tags/v1.0.0.tar.gz"
+  url "https://github.com/kwicz/image-luminescence/archive/refs/tags/v1.1.0.tar.gz"
   sha256 "0099655dbd7c415b26b7cf6d38b42529c94abd2a0c1c26ac090aeaa2b3e394c4"
   license "MIT"
-  revision 1
 
   depends_on "imagemagick"
   depends_on "libultrahdr"
@@ -20,7 +19,8 @@ class ImageLuminescence < Formula
 
   def install
     libexec.install "luminescence.py", "luminescence_pq.py",
-                    "luminescence_icc.py", "rec2020-pq-reference.icc"
+                    "luminescence_reveal.py", "luminescence_icc.py",
+                    "rec2020-pq-reference.icc"
     # Pick whichever Homebrew python can import numpy, at run time, so
     # the shims survive python@3.x version bumps.
     finder = <<~SH
@@ -36,6 +36,7 @@ class ImageLuminescence < Formula
     SH
     (bin/"luminesce").write finder.sub("SCRIPT", "luminescence.py")
     (bin/"luminesce-pq").write finder.sub("SCRIPT", "luminescence_pq.py")
+    (bin/"luminesce-reveal").write finder.sub("SCRIPT", "luminescence_reveal.py")
   end
 
   test do
