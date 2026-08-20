@@ -98,9 +98,10 @@ h1 .lumi {
   line-height: 1.25;
   text-align: center;
   max-width: 26ch;
-  margin: 0;
+  margin: 0 auto;
   text-wrap: balance;
 }
+.sub { margin-left: auto; margin-right: auto; }
 .lede em {
   font-style: italic;
   color: var(--phosphor);
