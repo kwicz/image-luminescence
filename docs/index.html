@@ -5,6 +5,98 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>image-luminescence</title>
 <meta name="description" content="Make your images glow on HDR displays. Free, private, runs entirely in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="image-luminescence">
+<meta property="og:description" content="Make your images glow on HDR displays. Your colors stay exactly yours. Free, in your browser, no uploads.">
+<meta property="og:url" content="https://kwicz.github.io/image-luminescence/">
+<meta property="og:image" content="https://kwicz.github.io/image-luminescence/assets/og-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="image-luminescence">
+<meta name="twitter:description" content="Make your images glow on HDR displays. Your colors stay exactly yours. Free, in your browser, no uploads.">
+<meta name="twitter:image" content="https://kwicz.github.io/image-luminescence/assets/og-preview.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "image-luminescence",
+      "url": "https://kwicz.github.io/image-luminescence/",
+      "description": "Free browser tool that makes images glow on HDR displays. Converts PNG or JPEG into an Ultra HDR gain-map JPEG whose whites render brighter than the screen's normal white, while every color stays pixel-exact. Runs entirely client-side; images never leave the machine.",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Any (runs in the browser)",
+      "browserRequirements": "Chrome or Edge on an HDR display to see the glow",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "image": "https://kwicz.github.io/image-luminescence/assets/og-preview.png",
+      "featureList": [
+        "Converts sRGB images to Ultra HDR (ISO 21496-1) gain-map JPEGs",
+        "Whites glow up to the display's maximum brightness",
+        "Colors preserved exactly; JPEG bases kept byte-for-byte",
+        "Adjustable glow strength and threshold",
+        "No uploads; all conversion happens in the browser",
+        "Open-source command-line version available"
+      ],
+      "softwareHelp": "https://github.com/kwicz/image-luminescence"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do glowing HDR images work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A gain-map file contains two images: the untouched sRGB image, plus a hidden grayscale glow map marking which pixels may exceed the screen's normal white and by how much. HDR displays apply the map; everything else ignores it and shows a normal image. It is the ISO 21496-1 gain map format, the same mechanism iPhone photos have used since iOS 17."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which displays show the glow?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Screens with HDR brightness headroom: MacBook Pro 2021 and later glows strongly, other Mac laptops from around 2016 glow gently when dimmed, iPhone 12 and later, most OLED phones, and true HDR monitors and TVs. Standard-range screens show correct colors with no glow. Headroom grows as screen brightness is lowered."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which apps and browsers show the glow?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chrome and Edge on HDR displays, Android, and iOS 17+ Photos render gain-map glow. macOS Preview shows correct colors without the boost. Anywhere unsupported, the image simply looks normal."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do glowing images change the original colors?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The base image keeps the original sRGB pixels, byte-for-byte for JPEG input. The glow travels as separate metadata, so viewers that do not support it show the image exactly as authored."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why do glowing LinkedIn company logos work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LinkedIn preserves PNG color profiles on company-page logos, so a PNG converted to Rec.2020 PQ with a BT.2100 PQ profile keeps its glow there. Pipelines that re-encode images, like Slack, strip gain maps (leaving a normal image) and can render PQ PNGs washed out, which is why the gain-map JPEG is the safer default."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KRL29RBPX2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-KRL29RBPX2');
+</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -204,7 +296,9 @@ python3 luminescence.py logo.png
   <footer>
     <p class="foot-note"><strong>Use it kindly.</strong> Luminesced images
     override the brightness a viewer chose. For fun, for logos, for sparkle
-    &mdash; never behind body text.</p>
+    &mdash; never behind body text.
+    Analytics counts page views and anonymous usage only; your images never
+    leave your machine.</p>
     <p class="foot-meta"><span id="hdr-check"></span>iso 21496-1 &middot; chrome &middot; edge &middot; android &middot; iOS 17+</p>
   </footer>
 </main>
@@ -278,6 +372,7 @@ function showRoom(name) {
   document.querySelectorAll("nav [data-room]").forEach((a) => {
     a.classList.toggle("here", a.dataset.room === target);
   });
+  gtag("event", "room_view", { room: target });
 }
 
 window.addEventListener("hashchange", () => showRoom(location.hash.slice(1)));
@@ -322,6 +417,8 @@ function pick(file) {
   convert();
 }
 
+$("download").addEventListener("click", () => gtag("event", "download"));
+
 $("reset").addEventListener("click", () => {
   currentFile = null;
   $("workbench").hidden = true;
@@ -354,6 +451,10 @@ async function convert() {
     $("img-after").src = url;
     $("download").href = url;
     $("download").download = outName;
+    gtag("event", "convert", {
+      boost: parseFloat($("boost").value),
+      knee: parseFloat($("knee").value),
+    });
   } catch (err) {
     alert("Conversion failed: " + err.message);
   } finally {
