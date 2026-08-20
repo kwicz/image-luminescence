@@ -129,8 +129,12 @@
           <img src="assets/disco-ball.png" alt="Watercolor disco ball, original">
         </figure>
         <figure>
-          <figcaption>luminesced &middot; whites at max</figcaption>
+          <figcaption>gain-map jpeg &middot; the default</figcaption>
           <img src="assets/disco-ball-luminescence.jpg" alt="Watercolor disco ball, luminesced — glows on HDR displays">
+        </figure>
+        <figure>
+          <figcaption>pq png &middot; for pipelines like linkedin</figcaption>
+          <img src="assets/disco-ball-pq.png" alt="PQ version — glows where color profiles survive; looks washed out in viewers that ignore them">
         </figure>
       </div>
       <p class="sub"><strong>Now drag your screen brightness down.</strong>
@@ -155,6 +159,16 @@ python3 luminescence.py logo.png
 
 --boost 49.26  <span class="c">glow ceiling, default max</span>
 --knee  0.85   <span class="c">how near white before glow</span></pre>
+          <p class="doc-title">which tool</p>
+          <p class="doc-body"><strong>Two converters, two strategies.</strong>
+          <code>luminescence.py</code> makes gain-map jpegs: glow as
+          removable metadata, safe everywhere &mdash; pipelines that
+          re-encode (Slack) just show a normal image. Use it by default.
+          <code>luminescence_pq.py</code> makes PQ pngs: glow baked into
+          the pixels, survives pipelines that keep PNG profiles (LinkedIn
+          &mdash; how those glowing company icons work), but viewers that
+          ignore the profile show a washed-out ghost (Slack). Only for
+          destinations you&rsquo;ve verified.</p>
         </div>
         <div class="doc-card">
           <p class="doc-title">this page</p>

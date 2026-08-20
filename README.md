@@ -32,16 +32,21 @@ browser.
 
 ## Example
 
-| Original | Luminesced |
-| --- | --- |
-| <img src="examples/disco-ball.png" alt="Original watercolor disco ball" width="380"> | <img src="examples/disco-ball-luminescence.jpg" alt="Glowing version" width="380"> |
+| Original | Luminesced (gain-map JPEG) | Luminesced (PQ PNG) |
+| --- | --- | --- |
+| <img src="examples/disco-ball.png" alt="Original watercolor disco ball" width="250"> | <img src="examples/disco-ball-luminescence.jpg" alt="Gain-map version — glows in HDR browsers" width="250"> | <img src="examples/disco-ball-pq.png" alt="PQ version — glows where profiles survive, ghosts where they don't" width="250"> |
 
 View this page in Chrome on an HDR display, then drag your screen brightness
 down: everything dims except the right image's whites -- the background and
 the grout between tiles hold their intensity. On an SDR screen (or in most
 desktop image viewers) the two look identical, which is exactly the point.
 
-To reproduce: `python3 luminescence.py examples/disco-ball.png`
+How the right one looks tells you about *your* viewer: glowing means it
+honors the PQ profile (Chrome), washed-out gray means it doesn't -- that's
+the trade the PQ format makes (see "Two tools" below).
+
+To reproduce: `python3 luminescence.py examples/disco-ball.png` and
+`python3 luminescence_pq.py examples/disco-ball.png --cicp --depth 8`
 
 ### Why this tool exists
 
@@ -55,6 +60,27 @@ the image in its own way:
 
 This tool exists to do neither: your pixels stay exactly what you authored,
 and the glow rides alongside as gain-map metadata.
+
+## Two tools, two strategies
+
+This repo ships two converters because destinations break images in two
+different ways. Pick by where the image is going:
+
+- **`luminescence.py` (gain-map JPEG) -- the default.** The glow travels as
+  removable metadata next to your untouched pixels. Glows in Chrome/Edge,
+  Android, and iOS 17+ Photos. Worst case, a pipeline strips the metadata
+  and the image simply looks normal (verified: Slack does this). Use it for
+  web pages, direct file sharing, and any destination you haven't tested.
+- **`luminescence_pq.py` (PQ PNG) -- for re-encoding pipelines you've
+  verified.** The glow is baked into the pixel values themselves with a PQ
+  color profile, so it survives pipelines that preserve PNGs and their
+  profiles (verified: LinkedIn -- this is how those glowing company icons
+  work). Worst case is ugly: a viewer that ignores the profile shows a
+  washed-out gray ghost (verified: Slack previews). Only use it where
+  you've seen it work.
+
+Rule of thumb: gain-map JPEG unless the destination re-encodes it to
+death AND you've confirmed the PQ PNG renders there.
 
 ## What displays show the glow
 
