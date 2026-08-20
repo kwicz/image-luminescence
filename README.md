@@ -9,7 +9,7 @@ regions ignore your brightness slider -- try it in Chrome.)*
 
 **Live demo:** [kwicz.github.io/image-luminescence](https://kwicz.github.io/image-luminescence/)
 -- converts in your browser, no uploads, with glowing examples on any HDR
-display.
+display. **Or install it:** `brew tap kwicz/tap && brew install image-luminescence`
 
 Make ordinary images glow on HDR displays -- whites brighter than the
 screen's normal white, staying bright even when the display dims -- while
@@ -176,25 +176,27 @@ ramp smoothly -- no halos.
 
 ## Install
 
+It's a Homebrew package. This is the whole install:
+
 ```
-git clone https://github.com/kwicz/image-luminescence
-cd image-luminescence
-brew install imagemagick libultrahdr
+brew tap kwicz/tap
+brew install image-luminescence
 ```
 
-Python 3 with numpy. Macs with Xcode Command Line Tools have numpy bundled;
-otherwise: `pip3 install numpy`
+(Newer Homebrew asks for a one-time `brew trust kwicz/tap`.) That gives you
+`luminesce`, `luminesce-pq`, and `luminesce-reveal` on your PATH with all
+dependencies handled. Skip the rest of this section unless you want another
+route:
 
-Other ways to run it:
-
-- **pip**: `pip install .` from the clone installs `luminesce` and
-  `luminesce-pq` commands (ImageMagick + libultrahdr still come from brew).
+- **From source**: `git clone https://github.com/kwicz/image-luminescence &&
+  cd image-luminescence && brew install imagemagick libultrahdr`, plus numpy
+  (bundled with Xcode Command Line Tools; otherwise `pip3 install numpy`).
+- **pip**: `pip install .` from the clone (ImageMagick + libultrahdr still
+  come from brew).
 - **Finder Quick Action**: `./tools/install-quick-action.sh`, then
   right-click any image -> Quick Actions -> Luminesce.
 - **Figma plugin**: import `figma-plugin/manifest.json` via Plugins ->
   Development; converts the selected layer. See `figma-plugin/README.md`.
-- **Homebrew**: `brew tap kwicz/tap && brew install image-luminescence`
-  (newer Homebrew asks for a one-time `brew trust kwicz/tap`).
 
 ## Usage
 

@@ -116,6 +116,7 @@
       <a href="#reveal" data-room="reveal">image-reveal</a> &middot;
       <a href="#how" data-room="how">how it works</a> &middot;
       <a href="#docs" data-room="docs">docs</a><br>
+      <span class="brew">brew install image-luminescence</span> &middot;
       <a href="https://github.com/kwicz/image-luminescence" class="ext">source on github</a>
     </nav>
   </header>
@@ -295,15 +296,21 @@
       <div class="docs-grid">
         <div class="doc-card">
           <p class="doc-title">command line</p>
-          <pre>git clone https://github.com/kwicz/image-luminescence
-cd image-luminescence
-brew install imagemagick libultrahdr
-pip3 install numpy  <span class="c"># skip if you have xcode clt</span>
-python3 luminescence.py logo.png
+          <pre><span class="c"># it's a homebrew package:</span>
+brew tap kwicz/tap
+brew install image-luminescence
+
+luminesce logo.png
 <span class="c"># -&gt; logo-luminescence.jpg</span>
+luminesce-reveal a.png b.png
+luminesce-pq logo.png  <span class="c"># pq png, for linkedin</span>
 
 --boost 49.26  <span class="c">glow ceiling, default max</span>
 --knee  0.85   <span class="c">how near white before glow</span></pre>
+          <p class="doc-body" style="margin-top:10px">Prefer source?
+          <code>git clone</code> the repo, <code>brew install imagemagick
+          libultrahdr</code>, and run the python scripts directly &mdash;
+          same tools, no install.</p>
           <p class="doc-title">which tool</p>
           <p class="doc-body"><strong>Two converters, two strategies.</strong>
           <code>luminescence.py</code> makes gain-map jpegs: glow as

@@ -288,6 +288,7 @@ nav [data-room].here {
   text-shadow: 0 0 8px var(--bloom-halo);
 }
 nav .ext { color: var(--disco); }
+nav .brew { color: var(--ink); }
 
 /* reveal room */
 .reveal-drops { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
