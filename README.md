@@ -155,8 +155,8 @@ Other ways to run it:
   right-click any image -> Quick Actions -> Luminesce.
 - **Figma plugin**: import `figma-plugin/manifest.json` via Plugins ->
   Development; converts the selected layer. See `figma-plugin/README.md`.
-- **Homebrew**: tap-ready formula in `packaging/homebrew/` (needs a tagged
-  release; instructions in the file).
+- **Homebrew**: `brew tap kwicz/tap && brew install image-luminescence`
+  (newer Homebrew asks for a one-time `brew trust kwicz/tap`).
 
 ## Usage
 
@@ -233,4 +233,4 @@ backgrounds in someone's feed are the visual equivalent of autoplay audio.
 - Figma plugin -- in `figma-plugin/`, import-ready (Community publish pending)
 - macOS Finder Quick Action -- `tools/install-quick-action.sh`
 - pip -- `pip install .` works (PyPI publish pending)
-- Homebrew -- formula drafted in `packaging/homebrew/` (tap publish pending)
+- Homebrew -- live: `brew tap kwicz/tap && brew install image-luminescence`
