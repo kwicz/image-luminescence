@@ -5,7 +5,11 @@
 <img src="examples/banner-brightness-down.jpg" alt="TURN YOUR BRIGHTNESS DOWN" width="760">
 
 *(Both banners are outputs of this tool. On an HDR display their white
-regions ignore your brightness slider -- try it.)*
+regions ignore your brightness slider -- try it in Chrome.)*
+
+**Live demo:** [kwicz.github.io/image-luminescence](https://kwicz.github.io/image-luminescence/)
+-- converts in your browser, no uploads, with glowing examples on any HDR
+display.
 
 Make ordinary images glow on HDR displays -- whites brighter than the
 screen's normal white, staying bright even when the display dims -- while
@@ -19,27 +23,23 @@ python3 luminescence.py logo.png
 
 and you get `logo-luminescence.jpg`: an Ultra HDR gain-map JPEG whose base
 image is your original pixels, byte-for-byte, with near-white regions boosted
-as bright as the viewer's display can go on HDR-capable systems (macOS 14+,
-iOS 17+, Chrome, Android). On SDR displays or non-supporting apps it renders as a
-completely normal image -- the failure mode is "no glow," never "wrong
-colors."
+as bright as the viewer's display can go on HDR-capable systems. The glow
+shows reliably in Chrome/Edge on HDR displays, on Android, and in iOS 17+
+Photos; desktop viewers vary (macOS Preview shows correct colors without the
+boost). Anywhere unsupported it renders as a completely normal image -- the
+failure mode is "no glow," never "wrong colors." Judge your results in a
+browser.
 
 ## Example
-
-> [!IMPORTANT]
-> **Turn your screen brightness up and down while looking at this page.**
-> Everything dims with your brightness slider -- except the luminesced
-> whites, which hold their intensity and glow harder and harder against
-> the dimming page.
 
 | Original | Luminesced |
 | --- | --- |
 | <img src="examples/disco-ball.png" alt="Original watercolor disco ball" width="380"> | <img src="examples/disco-ball-luminescence.jpg" alt="Glowing version" width="380"> |
 
-View this page in Chrome (or another Ultra HDR-aware browser) on an HDR
-display: the right image's whites -- the background and the grout between
-tiles -- lift off the page while the watercolor tiles stay true. On an SDR
-screen the two images look identical, which is exactly the point.
+View this page in Chrome on an HDR display, then drag your screen brightness
+down: everything dims except the right image's whites -- the background and
+the grout between tiles hold their intensity. On an SDR screen (or in most
+desktop image viewers) the two look identical, which is exactly the point.
 
 To reproduce: `python3 luminescence.py examples/disco-ball.png`
 
@@ -56,6 +56,26 @@ the image in its own way:
 This tool exists to do neither: your pixels stay exactly what you authored,
 and the glow rides alongside as gain-map metadata.
 
+## What displays show the glow
+
+Two things must both be true: the *software* applies the gain map (Chrome or
+Edge on desktop, Android, iOS 17+ Photos), and the *screen* has brightness
+headroom to glow into.
+
+- **Glows**: MacBook Pro 2021+ (XDR panels -- the dramatic case), other Mac
+  laptops from roughly 2016 (gently, when dimmed), Pro Display XDR, iPhone
+  12+, most OLED phones, and true HDR monitors/TVs (roughly 2016+; marketing
+  "HDR400" monitors barely count).
+- **No glow**: SDR-era screens -- Apple's Thunderbolt Display and other older
+  monitors, most office displays, projectors. They show correct colors,
+  nothing more; a MacBook that glows will stop glowing when the window moves
+  to an SDR external monitor.
+- Quick self-test: the [live demo](https://kwicz.github.io/image-luminescence/)
+  detects your display and reports "glow-ready" or "no hdr headroom" in the
+  page footer.
+- Headroom shrinks as screen brightness rises. The glow is strongest on a
+  dimmed screen and can vanish entirely at maximum brightness.
+
 ## What kind of images work best
 
 The glow is applied to pixels that are already near-white, so the effect
@@ -64,8 +84,8 @@ lives or dies on where your whites are:
 - **Best**: graphics whose whites represent light -- logos with white
   marks or text, icons, sparkles and highlights, line art on colored
   backgrounds. Small, intentional white areas read as "lit up."
-- **Good**: artwork with scattered near-white highlights (the disco ball
-  above -- its white grout and hotspots glow like catchlights).
+- **Good**: artwork with scattered near-white highlights -- they glow like
+  catchlights.
 - **Works, but loud**: anything on a large white background -- the whole
   background glows. Striking for a hero image, blinding in a document.
 - **No visible effect**: images with nothing near white (a dark photo, a
@@ -93,17 +113,29 @@ ramp smoothly -- no halos.
 ## Install
 
 ```
+git clone https://github.com/kwicz/image-luminescence
+cd image-luminescence
 brew install imagemagick libultrahdr
 ```
 
-Python 3 with numpy (ships with macOS's /usr/bin/python3).
+Python 3 with numpy. Macs with Xcode Command Line Tools have numpy bundled;
+otherwise: `pip3 install numpy`
 
 ## Usage
 
+From the `image-luminescence` folder -- the `cd` above puts you there. (In a
+new terminal window, `cd` back into wherever you cloned it first; commands
+run from other folders will fail with "can't open file luminescence.py".)
+
 ```
-python3 luminescence.py input.png [-o out.jpg] [--boost 49.26] [--knee 0.85] [--quality 95]
+python3 luminescence.py input.png
 ```
 
+Output lands next to the input as `input-luminescence.jpg`. Options (add any
+of these to the command):
+
+
+- `-o out.jpg`  choose the output path
 - `--boost`  max brightness of whites, as a multiple of SDR white. The
   default is the format's ceiling (10000 nits, about 49x), which means
   "as bright as the viewer's display can physically go" -- every screen
@@ -118,8 +150,12 @@ is already a JPEG its bytes are kept verbatim as the base image.
 ### PQ fallback: luminescence_pq.py
 
 ```
-python3 luminescence_pq.py input.png [--nits 1000] [--sdr-nits 203] [--knee 0.85] [--depth 16|8] [--cicp] [--uniform]
+python3 luminescence_pq.py input.png --cicp
 ```
+
+Options: `--nits` (peak, default 1000), `--sdr-nits` (default 203), `--knee`,
+`--depth 8` or `16`, `--uniform`.
+
 
 Produces a 16-bit Rec.2020 PQ PNG (embedding `rec2020-pq-reference.icc`,
 plus a `cICP` chunk with `--cicp`). Use this only for destinations that
@@ -156,7 +192,7 @@ backgrounds in someone's feed are the visual equivalent of autoplay audio.
 
 ## Roadmap
 
-- Free client-side website (no uploads -- all conversion in the browser)
+- Free client-side website -- [live](https://kwicz.github.io/image-luminescence/)
 - Figma plugin (shares the website's JS math)
 - macOS Finder Quick Action
 - pip / Homebrew packaging

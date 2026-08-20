@@ -15,58 +15,183 @@
 <body>
 <main>
   <header>
-    <svg id="orb" width="44" height="44" viewBox="0 0 150 150" role="img"
-         aria-label="image-luminescence mark"></svg>
-    <h1>image-<span class="lumi">luminescence</span></h1>
-    <p class="readout">in-browser &middot; no uploads &middot; ultra hdr<br>
-    <a href="https://github.com/kwicz/image-luminescence">source on github</a></p>
+    <a id="home-link" href="#" aria-label="Back to the converter">
+      <svg id="orb" width="44" height="44" viewBox="0 0 150 150" role="img"
+           aria-label="image-luminescence mark"></svg>
+    </a>
+    <h1><a id="wordmark-link" href="#">image-<span class="lumi">luminescence</span></a></h1>
+    <nav class="readout" aria-label="Site">
+      <a href="#how" data-room="how">how it works</a> &middot;
+      <a href="#examples" data-room="examples">examples</a> &middot;
+      <a href="#docs" data-room="docs">docs</a><br>
+      <a href="https://github.com/kwicz/image-luminescence" class="ext">source on github</a>
+    </nav>
   </header>
 
   <div class="stage">
-    <div id="intro">
-      <p class="lede">Your images, <em>glowing</em>.<br>Colors untouched.</p>
-      <p class="sub">Whites lift beyond your screen&rsquo;s white on HDR displays. Everything else stays exactly as you made it.</p>
-    </div>
 
-    <section id="dropzone" tabindex="0" role="button"
-             aria-label="Choose or drop an image to luminesce">
-      <p><strong>Drop an image</strong> or click to choose</p>
-      <p class="small">png or jpeg &middot; jpeg bases kept byte-for-byte</p>
-      <input type="file" id="file-input" accept="image/png,image/jpeg" hidden>
+    <!-- room: home / the tool -->
+    <section class="room active" id="room-home">
+      <div id="intro">
+        <p class="lede">Your images, <em>glowing</em>.<br>Colors untouched.</p>
+        <p class="sub">Whites lift beyond your screen&rsquo;s white on HDR displays. Everything else stays exactly as you made it.</p>
+      </div>
+
+      <div id="dropzone" tabindex="0" role="button"
+           aria-label="Choose or drop an image to luminesce">
+        <p><strong>Drop an image</strong> or click to choose</p>
+        <p class="small">png or jpeg &middot; jpeg bases kept byte-for-byte</p>
+        <input type="file" id="file-input" accept="image/png,image/jpeg" hidden>
+      </div>
+
+      <div id="workbench" hidden>
+        <div class="compare">
+          <figure>
+            <figcaption>original</figcaption>
+            <img id="img-before" alt="Original image">
+          </figure>
+          <figure>
+            <figcaption>luminesced</figcaption>
+            <img id="img-after" alt="Luminesced image (glows on HDR displays)">
+          </figure>
+        </div>
+        <div class="bench-row">
+          <label>glow strength
+            <input type="range" id="boost" min="1.1" max="49.26" step="0.01" value="49.26">
+            <span class="val" id="boost-label">max &middot; 10,000 nits</span>
+          </label>
+          <label>glow threshold
+            <input type="range" id="knee" min="0.5" max="0.99" step="0.01" value="0.85">
+            <span class="val" id="knee-label">85% &middot; near-whites only</span>
+          </label>
+          <button id="convert">Luminesce</button>
+          <a id="download" class="button ghost">Download</a>
+          <button id="reset" class="ghost" type="button">New image</button>
+        </div>
+      </div>
     </section>
 
-    <div id="workbench" hidden>
+    <!-- room: how it works -->
+    <section class="room" id="room-how">
+      <p class="lede">One file, <em>two</em> images.</p>
+      <div class="beats">
+        <div class="beat">
+          <div class="beat-visual"><img src="assets/disco-ball.png" alt="" aria-hidden="true"></div>
+          <p><strong>Your image, untouched.</strong> The file&rsquo;s base is
+          your exact sRGB pixels &mdash; byte-for-byte when you feed it a jpeg.
+          Every display on earth shows your true colors.</p>
+        </div>
+        <div class="beat">
+          <div class="beat-visual"><img src="assets/disco-ball-stencil.png" alt="" aria-hidden="true"></div>
+          <p><strong>A glow map rides along.</strong> A second, hidden
+          grayscale image &mdash; this is the disco ball&rsquo;s, for real.
+          White pixels mean &ldquo;boost the matching pixel,&rdquo; black
+          means &ldquo;leave it alone.&rdquo; Nothing in your image is
+          blurred or changed.</p>
+        </div>
+        <div class="beat">
+          <div class="beat-visual result" aria-hidden="true"><span></span></div>
+          <p><strong>HDR displays apply it.</strong> Capable screens boost the
+          marked pixels into brightness headroom. Everything else ignores the
+          stencil and sees a perfectly normal jpeg.</p>
+        </div>
+      </div>
+      <div class="curve-strip">
+        <svg width="270" height="104" viewBox="0 0 270 104" role="img"
+             aria-label="The gain curve: flat at no boost until the threshold, then rising smoothly to full strength at pure white">
+          <line x1="18" y1="86" x2="256" y2="86" stroke="#27273a" stroke-width="1"/>
+          <line x1="18" y1="86" x2="18" y2="10" stroke="#27273a" stroke-width="1"/>
+          <path d="M18 84 L172 84 Q216 84 248 22" fill="none"
+                stroke="#e08dba" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="248" cy="22" r="4" fill="#ffffff" filter="url(#curve-glow)"/>
+          <line x1="172" y1="84" x2="172" y2="92" stroke="#a3a1b8" stroke-width="1"/>
+          <text x="172" y="102" text-anchor="middle" class="curve-label">threshold</text>
+          <text x="242" y="12" text-anchor="end" class="curve-label">strength</text>
+          <text x="18" y="102" class="curve-label">black</text>
+          <text x="256" y="102" text-anchor="end" class="curve-label">white</text>
+          <defs><filter id="curve-glow" x="-200%" y="-200%" width="500%" height="500%">
+            <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ffffff" flood-opacity="0.9"/>
+            <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#e08dba" flood-opacity="0.6"/>
+          </filter></defs>
+        </svg>
+        <p class="sub curve-note">The curve behind the sliders: nothing is
+        boosted until a pixel nears white, then the glow ramps to full
+        strength. The format is the ISO 21496-1 gain map &mdash; the same
+        mechanism every iPhone photo has used since iOS 17.</p>
+      </div>
+    </section>
+
+    <!-- room: examples -->
+    <section class="room" id="room-examples">
       <div class="compare">
         <figure>
           <figcaption>original</figcaption>
-          <img id="img-before" alt="Original image">
+          <img src="assets/disco-ball.png" alt="Watercolor disco ball, original">
         </figure>
         <figure>
-          <figcaption>luminesced</figcaption>
-          <img id="img-after" alt="Luminesced image (glows on HDR displays)">
+          <figcaption>luminesced &middot; whites at max</figcaption>
+          <img src="assets/disco-ball-luminescence.jpg" alt="Watercolor disco ball, luminesced — glows on HDR displays">
         </figure>
       </div>
-      <div class="bench-row">
-        <label>glow strength
-          <input type="range" id="boost" min="1.1" max="49.26" step="0.01" value="49.26">
-          <span class="val" id="boost-label">max &middot; 10,000 nits</span>
-        </label>
-        <label>glow threshold
-          <input type="range" id="knee" min="0.5" max="0.99" step="0.01" value="0.85">
-          <span class="val" id="knee-label">85% &middot; near-whites only</span>
-        </label>
-        <button id="convert">Luminesce</button>
-        <a id="download" class="button ghost">Download</a>
-        <button id="reset" class="ghost" type="button">New image</button>
+      <p class="sub"><strong>Now drag your screen brightness down.</strong>
+      Everything dims except the luminesced whites &mdash; the grout between
+      tiles holds its intensity like it&rsquo;s lit from behind. Converted
+      files glow <em>in the browser</em> &mdash; Chrome is the sure thing;
+      desktop image viewers often show correct colors without the boost.</p>
+    </section>
+
+    <!-- room: docs -->
+    <section class="room" id="room-docs">
+      <p class="lede">Take it <em>home</em>.</p>
+      <div class="docs-grid">
+        <div class="doc-card">
+          <p class="doc-title">command line</p>
+          <pre>git clone https://github.com/kwicz/image-luminescence
+cd image-luminescence
+brew install imagemagick libultrahdr
+pip3 install numpy  <span class="c"># skip if you have xcode clt</span>
+python3 luminescence.py logo.png
+<span class="c"># -&gt; logo-luminescence.jpg</span>
+
+--boost 49.26  <span class="c">glow ceiling, default max</span>
+--knee  0.85   <span class="c">how near white before glow</span></pre>
+        </div>
+        <div class="doc-card">
+          <p class="doc-title">this page</p>
+          <p class="doc-body">The converter above runs the same math compiled
+          to the browser &mdash; canvas in, gain-map jpeg out. Your image
+          never leaves your machine.</p>
+          <p class="doc-title">roadmap</p>
+          <p class="doc-body">npm + pip packages, a Figma plugin, and a macOS
+          quick action. Watch the <a href="https://github.com/kwicz/image-luminescence">repo</a>.</p>
+          <p class="doc-title">displays</p>
+          <p class="doc-body">The glow needs a screen with brightness headroom.
+          Rough vintages: MacBook Pro 2021+ glows hard, other Macs from
+          ~2016 glow gently when dimmed, iPhone 12+ and OLED phones glow,
+          and HDR monitors/TVs (roughly 2016+, real HDR &mdash; not
+          &ldquo;HDR400&rdquo;) glow. Standard-range screens like
+          Apple&rsquo;s Thunderbolt Display show correct colors, no glow.
+          Headroom shrinks as brightness rises &mdash; dim for maximum
+          glow. This page checks your display live, in the corner below.</p>
+          <p class="doc-title">format</p>
+          <p class="doc-body">ISO 21496-1 / Ultra HDR gain-map jpeg &middot;
+          glows in Chrome and Edge on HDR displays, Android, and iOS 17+
+          Photos. macOS Preview shows correct colors but may not boost.
+          Anywhere unsupported it&rsquo;s simply a normal image &mdash;
+          correct colors, no glow. The gain
+          curve &mdash; how hard each pixel is boosted &mdash; ramps from your
+          threshold to your ceiling and is stored as metadata, which is why
+          macOS describes these files as &ldquo;Adaptive Gain Curve.&rdquo;</p>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 
   <footer>
     <p class="foot-note"><strong>Use it kindly.</strong> Luminesced images
     override the brightness a viewer chose. For fun, for logos, for sparkle
     &mdash; never behind body text.</p>
-    <p class="foot-meta">iso 21496-1 &middot; macOS 14+ &middot; iOS 17+ &middot; chrome &middot; android</p>
+    <p class="foot-meta"><span id="hdr-check"></span>iso 21496-1 &middot; chrome &middot; edge &middot; android &middot; iOS 17+</p>
   </footer>
 </main>
 <script src="app.js"></script>
@@ -110,6 +235,48 @@
 })();
 
 const $ = (id) => document.getElementById(id);
+
+// ---------- live display check ----------
+(function () {
+  const el = $("hdr-check");
+  const mq = matchMedia("(dynamic-range: high)");
+  const render = () => {
+    el.textContent = mq.matches
+      ? "this display: glow-ready · "
+      : "this display: no hdr headroom · ";
+    el.style.color = mq.matches ? "var(--disco)" : "";
+  };
+  render();
+  mq.addEventListener("change", render);
+})();
+
+// ---------- rooms ----------
+const rooms = { home: "room-home", how: "room-how", examples: "room-examples", docs: "room-docs" };
+
+function showRoom(name) {
+  const target = rooms[name] ? name : "home";
+  document.querySelectorAll(".room").forEach((r) => r.classList.remove("active"));
+  const el = $(rooms[target]);
+  el.classList.add("active");
+  el.classList.remove("entering");
+  void el.offsetWidth; // restart the entrance animation
+  el.classList.add("entering");
+  document.querySelectorAll("nav [data-room]").forEach((a) => {
+    a.classList.toggle("here", a.dataset.room === target);
+  });
+}
+
+window.addEventListener("hashchange", () => showRoom(location.hash.slice(1)));
+document.querySelectorAll("#home-link, #wordmark-link").forEach((a) =>
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    history.pushState(null, "", location.pathname);
+    showRoom("home");
+  })
+);
+if (location.hash) showRoom(location.hash.slice(1));
+
+// ---------- converter ----------
 let currentFile = null;
 let outName = "luminesced.jpg";
 
