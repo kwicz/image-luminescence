@@ -23,7 +23,14 @@ import numpy as np
 
 from luminescence_pq import decode_image, srgb_eotf
 
+# The gain-map target-luminance field caps at 10000 nits; with SDR white at
+# 203 nits that is the largest expressible boost. Displays clamp to their
+# own headroom, so max boost = "as bright as this screen can go".
+MAX_BOOST = 10000.0 / 203.0
+
+
 def build(input_path, out_path, boost, knee, quality):
+    boost = min(boost, MAX_BOOST)
     rgba, w, h = decode_image(input_path)
     if np.any(rgba[..., 3] < 1.0):
         print("note: JPEG has no alpha; transparency flattened onto white",
@@ -44,6 +51,7 @@ def build(input_path, out_path, boost, knee, quality):
         subprocess.run(
             ["magick", input_path + "[0]", "-strip", "-background", "white",
              "-alpha", "remove", "-alpha", "off",
+             "-type", "truecolor",  # grayscale JPEG is rejected as a base
              "-quality", str(quality), base_jpg],
             check=True,
         )
@@ -82,9 +90,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("input")
     ap.add_argument("-o", "--output", help="output JPEG (default: <input>-glow.jpg)")
-    ap.add_argument("--boost", type=float, default=4.0,
+    ap.add_argument("--boost", type=float, default=MAX_BOOST,
                     help="max brightness of whites, as a multiple of SDR "
-                         "white (default 4; clamped by display headroom)")
+                         "white (default %(default).2f = the format's 10000-"
+                         "nit ceiling; every display renders whites at its "
+                         "own maximum)")
     ap.add_argument("--knee", type=float, default=0.85,
                     help="brightness level (0..1) where the glow ramp starts")
     ap.add_argument("--quality", type=int, default=95,

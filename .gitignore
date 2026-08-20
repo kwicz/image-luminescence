@@ -7,5 +7,9 @@
 # the reference profile is required by luminescence_pq.py
 !rec2020-pq-reference.icc
 
+# README example images
+!examples/*.png
+!examples/*.jpg
+
 .DS_Store
 __pycache__/

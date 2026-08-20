@@ -17,6 +17,62 @@ Chrome, Android). On SDR displays or non-supporting apps it renders as a
 completely normal image -- the failure mode is "no glow," never "wrong
 colors."
 
+## Example
+
+| Original | Luminesced |
+| --- | --- |
+| ![Original watercolor disco ball](examples/disco-ball.png) | ![Glowing version](examples/disco-ball-luminescence.jpg) |
+
+View this page in Chrome (or another Ultra HDR-aware browser) on an HDR
+display: the right image's whites -- the background and the grout between
+tiles -- lift off the page while the watercolor tiles stay true. On an SDR
+screen the two images look identical, which is exactly the point.
+
+To reproduce: `python3 luminescence.py examples/disco-ball.png`
+
+### Why this tool exists
+
+The obvious way to make an HDR image -- converting through ICC profiles with
+ImageMagick -- wrecks the colors. Here is the same disco ball through
+`magick in.png -profile sRGB.icc -profile rec2020_pq.icc`:
+
+![ImageMagick profile conversion, colors ruined](examples/disco-ball-imagemagick.png)
+
+Pure white comes out as murky green-gray `rgb(123,127,105)`, and every color
+drifts with it.
+
+The other common trick -- tagging untouched sRGB pixels with an HDR profile,
+no conversion -- glows impressively, but reinterprets every color in the
+wrong gamut. The pastel watercolor turns hot neon pink:
+
+![Naive HDR tag, glowing but oversaturated](examples/disco-ball-tagged.png)
+
+(On an HDR display in a profile-aware browser this one really does glow --
+and that saturation shift is the price. Compare its tiles to the original
+above.)
+
+This tool exists to do neither: your pixels stay exactly what you authored,
+and the glow rides alongside as gain-map metadata.
+
+## What kind of images work best
+
+The glow is applied to pixels that are already near-white, so the effect
+lives or dies on where your whites are:
+
+- **Best**: graphics whose whites represent light -- logos with white
+  marks or text, icons, sparkles and highlights, line art on colored
+  backgrounds. Small, intentional white areas read as "lit up."
+- **Good**: artwork with scattered near-white highlights (the disco ball
+  above -- its white grout and hotspots glow like catchlights).
+- **Works, but loud**: anything on a large white background -- the whole
+  background glows. Striking for a hero image, blinding in a document.
+- **No visible effect**: images with nothing near white (a dark photo, a
+  saturated illustration). Nothing crosses the knee, so nothing glows;
+  lower `--knee` to pull the glow deeper into the midtones.
+- **Transparency**: JPEG output flattens alpha onto white, and that white
+  background will glow. If you don't want a glowing backdrop, composite
+  your art onto a colored background first.
+
 ## How it works
 
 A gain-map file contains two images: your untouched sRGB image, plus a small
@@ -43,11 +99,13 @@ Python 3 with numpy (ships with macOS's /usr/bin/python3).
 ## Usage
 
 ```
-python3 luminescence.py input.png [-o out.jpg] [--boost 4] [--knee 0.85] [--quality 95]
+python3 luminescence.py input.png [-o out.jpg] [--boost 49.26] [--knee 0.85] [--quality 95]
 ```
 
-- `--boost`  max brightness of whites, as a multiple of SDR white (default 4;
-  the display clamps to its available headroom)
+- `--boost`  max brightness of whites, as a multiple of SDR white. The
+  default is the format's ceiling (10000 nits, about 49x), which means
+  "as bright as the viewer's display can physically go" -- every screen
+  clamps to its own maximum headroom. Pass a lower value for a gentler glow
 - `--knee`   how bright a pixel must be (0-1) before it starts to glow
   (default 0.85; raise to 0.95 to restrict glow to near-pure whites)
 - `--quality` JPEG quality for the base and gain map (default 95)
@@ -76,6 +134,23 @@ never shifts. `--uniform` scales the whole image instead of only highlights.
 
 Verifies profile embedding, white neutrality, exact color round-trips, and
 that highlight mode holds colors at SDR level while whites hit the peak.
+
+## Accessibility
+
+Luminesced images don't violate accessibility guidelines -- the glow is
+static (no flashing, so WCAG's photosensitivity thresholds don't apply),
+colors and contrast are unchanged, and on SDR displays or non-supporting
+apps the image is simply normal. But guidelines lag the technology, and
+"compliant" isn't the same as "considerate": these images deliberately
+exceed the brightness the viewer chose for their screen, and there is no
+built-in way for them to opt out. Someone reading in a dark room, or
+sensitive to bright light, experiences your glow at full strength.
+
+So use it thoughtfully. This is a for-fun, decorative effect -- logos,
+celebration graphics, a bit of sparkle -- not something to put behind body
+text, essential UI, or anything a person is forced to look at to get
+something done. Small glowing accents delight; full-bleed glowing
+backgrounds in someone's feed are the visual equivalent of autoplay audio.
 
 ## Roadmap
 
