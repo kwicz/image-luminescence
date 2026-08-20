@@ -10,7 +10,7 @@ class ImageLuminescence < Formula
   desc "Make images glow on HDR displays; colors preserved exactly"
   homepage "https://kwicz.github.io/image-luminescence/"
   url "https://github.com/kwicz/image-luminescence/archive/refs/tags/v1.1.0.tar.gz"
-  sha256 "0099655dbd7c415b26b7cf6d38b42529c94abd2a0c1c26ac090aeaa2b3e394c4"
+  sha256 "dce20d43842936040ba0e804675c8ff63752988e7804ffc637c6396484103581"
   license "MIT"
 
   depends_on "imagemagick"
