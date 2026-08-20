@@ -9,68 +9,64 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380..700;1,9..144,380..700&family=Hanken+Grotesk:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
-  <div class="hero">
-    <svg id="orb" width="120" height="120" viewBox="0 0 150 150" role="img"
-         aria-label="image-luminescence mark: a disco orb of dim pink tiles, three tiles glowing white"></svg>
-    <div>
-      <h1 class="display">image-<span class="lumi">luminescence</span></h1>
-      <p class="tagline">Make your images glow on HDR displays.
-      <strong>Your colors stay exactly yours</strong> &mdash; only the whites
-      lift off the screen.</p>
-      <p class="tagline small">Free. No uploads &mdash; everything happens in
-      your browser. <a href="https://github.com/kwicz/image-luminescence">Source on GitHub</a>.</p>
+  <header>
+    <svg id="orb" width="44" height="44" viewBox="0 0 150 150" role="img"
+         aria-label="image-luminescence mark"></svg>
+    <h1>image-<span class="lumi">luminescence</span></h1>
+    <p class="readout">in-browser &middot; no uploads &middot; ultra hdr<br>
+    <a href="https://github.com/kwicz/image-luminescence">source on github</a></p>
+  </header>
+
+  <div class="stage">
+    <div id="intro">
+      <p class="lede">Your images, <em>glowing</em>.<br>Colors untouched.</p>
+      <p class="sub">Whites lift beyond your screen&rsquo;s white on HDR displays. Everything else stays exactly as you made it.</p>
+    </div>
+
+    <section id="dropzone" tabindex="0" role="button"
+             aria-label="Choose or drop an image to luminesce">
+      <p><strong>Drop an image</strong> or click to choose</p>
+      <p class="small">png or jpeg &middot; jpeg bases kept byte-for-byte</p>
+      <input type="file" id="file-input" accept="image/png,image/jpeg" hidden>
+    </section>
+
+    <div id="workbench" hidden>
+      <div class="compare">
+        <figure>
+          <figcaption>original</figcaption>
+          <img id="img-before" alt="Original image">
+        </figure>
+        <figure>
+          <figcaption>luminesced</figcaption>
+          <img id="img-after" alt="Luminesced image (glows on HDR displays)">
+        </figure>
+      </div>
+      <div class="bench-row">
+        <label>glow strength
+          <input type="range" id="boost" min="1.1" max="49.26" step="0.01" value="49.26">
+          <span class="val" id="boost-label">max &middot; 10,000 nits</span>
+        </label>
+        <label>glow threshold
+          <input type="range" id="knee" min="0.5" max="0.99" step="0.01" value="0.85">
+          <span class="val" id="knee-label">85% &middot; near-whites only</span>
+        </label>
+        <button id="convert">Luminesce</button>
+        <a id="download" class="button ghost">Download</a>
+        <button id="reset" class="ghost" type="button">New image</button>
+      </div>
     </div>
   </div>
 
-  <section id="dropzone" tabindex="0" role="button"
-           aria-label="Choose or drop an image to luminesce">
-    <p><strong>Drop an image here</strong> or click to choose</p>
-    <p class="small">PNG or JPEG &middot; JPEG bases are kept byte-for-byte</p>
-    <input type="file" id="file-input" accept="image/png,image/jpeg" hidden>
-  </section>
-
-  <section id="controls" hidden>
-    <label>Glow strength
-      <input type="range" id="boost" min="1.1" max="49.26" step="0.01" value="49.26">
-      <span id="boost-label">MAX &middot; 10,000 nits</span>
-    </label>
-    <label>Glow threshold &mdash; how close to white before a pixel glows
-      <input type="range" id="knee" min="0.5" max="0.99" step="0.01" value="0.85">
-      <span id="knee-label">85%</span>
-    </label>
-    <button id="convert">Luminesce</button>
-  </section>
-
-  <section id="result" hidden>
-    <div class="compare">
-      <figure>
-        <figcaption>Original</figcaption>
-        <img id="img-before" alt="Original image">
-      </figure>
-      <figure>
-        <figcaption>Luminesced</figcaption>
-        <img id="img-after" alt="Luminesced image (glows on HDR displays)">
-      </figure>
-    </div>
-    <p class="small">If the two look identical, your display, browser, or
-    brightness setting has no HDR headroom right now &mdash; try Chrome, and
-    try turning your screen brightness down.</p>
-    <a id="download" class="button">Download</a>
-  </section>
-
   <footer>
-    <div class="card">
-      <p class="small"><strong>Use it kindly.</strong> Luminesced images
-      override the brightness the viewer chose for their screen. It&rsquo;s a
-      for-fun, decorative effect &mdash; great for logos and celebration
-      graphics, unkind behind body text or anywhere people can&rsquo;t look
-      away from.</p>
-    </div>
+    <p class="foot-note"><strong>Use it kindly.</strong> Luminesced images
+    override the brightness a viewer chose. For fun, for logos, for sparkle
+    &mdash; never behind body text.</p>
+    <p class="foot-meta">iso 21496-1 &middot; macOS 14+ &middot; iOS 17+ &middot; chrome &middot; android</p>
   </footer>
 </main>
 <script src="app.js"></script>
@@ -138,17 +134,28 @@ $("file-input").addEventListener("change", () => {
 function pick(file) {
   currentFile = file;
   outName = file.name.replace(/\.[^.]*$/, "") + "-luminescence.jpg";
-  $("controls").hidden = false;
+  $("intro").hidden = true;
+  $("dropzone").hidden = true;
+  $("workbench").hidden = false;
   $("img-before").src = URL.createObjectURL(file);
   convert();
 }
 
+$("reset").addEventListener("click", () => {
+  currentFile = null;
+  $("workbench").hidden = true;
+  $("intro").hidden = false;
+  $("dropzone").hidden = false;
+  $("file-input").value = "";
+});
+
 $("boost").addEventListener("input", () => {
   const v = parseFloat($("boost").value);
-  $("boost-label").textContent = v >= 49.26 ? "MAX · 10,000 nits" : v.toFixed(1) + "x over SDR white";
+  $("boost-label").textContent = v >= 49.26 ? "max · 10,000 nits" : v.toFixed(1) + "x over sdr white";
 });
 $("knee").addEventListener("input", () => {
-  $("knee-label").textContent = Math.round($("knee").value * 100) + "%";
+  $("knee-label").textContent = Math.round($("knee").value * 100) + "% · " +
+    ($("knee").value > 0.8 ? "near-whites only" : "deeper into midtones");
 });
 $("convert").addEventListener("click", convert);
 
@@ -166,7 +173,6 @@ async function convert() {
     $("img-after").src = url;
     $("download").href = url;
     $("download").download = outName;
-    $("result").hidden = false;
   } catch (err) {
     alert("Conversion failed: " + err.message);
   } finally {
