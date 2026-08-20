@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "image-luminescence"
+version = "1.0.0"
+description = "Make images glow on HDR displays: Ultra HDR gain-map JPEGs and Rec.2020 PQ PNGs, colors preserved exactly"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Katy Solovewicz" }]
+requires-python = ">=3.9"
+dependencies = ["numpy"]
+keywords = ["hdr", "ultra-hdr", "gain-map", "iso-21496", "pq", "glow", "image"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+]
+
+[project.urls]
+Homepage = "https://kwicz.github.io/image-luminescence/"
+Source = "https://github.com/kwicz/image-luminescence"
+
+[project.scripts]
+luminesce = "luminescence:main"
+luminesce-pq = "luminescence_pq:main"
+
+[tool.setuptools]
+py-modules = ["luminescence", "luminescence_pq", "luminescence_icc"]

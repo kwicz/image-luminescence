@@ -161,7 +161,10 @@ def main():
     args = ap.parse_args()
 
     out_path = args.output or os.path.splitext(args.input)[0] + "-luminescence-pq.png"
-    icc = open(PROFILE_PATH, "rb").read()
+    if os.path.exists(PROFILE_PATH):
+        icc = open(PROFILE_PATH, "rb").read()
+    else:  # pip-installed: no data file next to the module
+        from luminescence_icc import DATA as icc
 
     rgba, w, h = decode_image(args.input)
     sdr = None if args.uniform else args.sdr_nits

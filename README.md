@@ -147,6 +147,17 @@ brew install imagemagick libultrahdr
 Python 3 with numpy. Macs with Xcode Command Line Tools have numpy bundled;
 otherwise: `pip3 install numpy`
 
+Other ways to run it:
+
+- **pip**: `pip install .` from the clone installs `luminesce` and
+  `luminesce-pq` commands (ImageMagick + libultrahdr still come from brew).
+- **Finder Quick Action**: `./tools/install-quick-action.sh`, then
+  right-click any image -> Quick Actions -> Luminesce.
+- **Figma plugin**: import `figma-plugin/manifest.json` via Plugins ->
+  Development; converts the selected layer. See `figma-plugin/README.md`.
+- **Homebrew**: tap-ready formula in `packaging/homebrew/` (needs a tagged
+  release; instructions in the file).
+
 ## Usage
 
 From the `image-luminescence` folder -- the `cd` above puts you there. (In a
@@ -219,6 +230,7 @@ backgrounds in someone's feed are the visual equivalent of autoplay audio.
 ## Roadmap
 
 - Free client-side website -- [live](https://kwicz.github.io/image-luminescence/)
-- Figma plugin (shares the website's JS math)
-- macOS Finder Quick Action
-- pip / Homebrew packaging
+- Figma plugin -- in `figma-plugin/`, import-ready (Community publish pending)
+- macOS Finder Quick Action -- `tools/install-quick-action.sh`
+- pip -- `pip install .` works (PyPI publish pending)
+- Homebrew -- formula drafted in `packaging/homebrew/` (tap publish pending)
