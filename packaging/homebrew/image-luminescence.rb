@@ -12,6 +12,7 @@ class ImageLuminescence < Formula
   url "https://github.com/kwicz/image-luminescence/archive/refs/tags/v1.0.0.tar.gz"
   sha256 "0099655dbd7c415b26b7cf6d38b42529c94abd2a0c1c26ac090aeaa2b3e394c4"
   license "MIT"
+  revision 1
 
   depends_on "imagemagick"
   depends_on "libultrahdr"
@@ -20,16 +21,21 @@ class ImageLuminescence < Formula
   def install
     libexec.install "luminescence.py", "luminescence_pq.py",
                     "luminescence_icc.py", "rec2020-pq-reference.icc"
-    python = Formula["numpy"].deps.map(&:name).grep(/^python@/).first || "python@3.13"
-    py = Formula[python].opt_bin/"python#{python.split("@").last}"
-    (bin/"luminesce").write <<~SH
+    # Pick whichever Homebrew python can import numpy, at run time, so
+    # the shims survive python@3.x version bumps.
+    finder = <<~SH
       #!/bin/bash
-      exec "#{py}" "#{libexec}/luminescence.py" "$@"
+      for py in "#{HOMEBREW_PREFIX}"/opt/python@3*/bin/python3* "#{HOMEBREW_PREFIX}"/bin/python3 /usr/bin/python3; do
+        [ -x "$py" ] || continue
+        if "$py" -c "import numpy" >/dev/null 2>&1; then
+          exec "$py" "#{libexec}/SCRIPT" "$@"
+        fi
+      done
+      echo "luminesce: no python3 with numpy found (try: brew install numpy)" >&2
+      exit 1
     SH
-    (bin/"luminesce-pq").write <<~SH
-      #!/bin/bash
-      exec "#{py}" "#{libexec}/luminescence_pq.py" "$@"
-    SH
+    (bin/"luminesce").write finder.sub("SCRIPT", "luminescence.py")
+    (bin/"luminesce-pq").write finder.sub("SCRIPT", "luminescence_pq.py")
   end
 
   test do
