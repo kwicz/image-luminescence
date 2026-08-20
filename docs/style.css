@@ -172,8 +172,15 @@ h1 .lumi {
   flex-direction: column;
   align-items: center;
   gap: 7px;
+  flex: 0 1 200px;
+}
+.compare.compact figcaption {
+  text-align: center;
+  max-width: 100%;
+  line-height: 1.5;
 }
 .compare.compact figcaption { margin-bottom: 0; }
+.compare.compact { gap: 26px; align-items: end; }
 #home-examples, #reveal-examples {
   display: flex;
   flex-direction: column;
@@ -308,7 +315,7 @@ nav .brew { color: var(--ink); }
 }
 .dropzone-mini p { margin: 2px 0; }
 .dropzone-mini .small { color: var(--dim); font-size: 0.78rem; }
-#reveal-bench select {
+.bench-row select {
   background: var(--void);
   color: var(--ink);
   border: 1px solid var(--dim);

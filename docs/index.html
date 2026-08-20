@@ -169,6 +169,14 @@
           </figure>
         </div>
         <div class="bench-row">
+          <label>where is it going?
+            <select id="format">
+              <option value="gainmap" selected>anywhere &middot; safe jpeg</option>
+              <option value="pq">linkedin &middot; survives their pipeline</option>
+            </select>
+            <span class="val" id="format-hint">glows in chrome, edge &amp; phones; looks
+            simply normal everywhere unsupported</span>
+          </label>
           <label>glow strength
             <input type="range" id="boost" min="1.1" max="49.26" step="0.01" value="49.26">
             <span class="val" id="boost-label">max &middot; 10,000 nits</span>
@@ -504,6 +512,12 @@ $("knee").addEventListener("input", () => {
   $("knee-label").textContent = Math.round($("knee").value * 100) + "% · " +
     ($("knee").value > 0.8 ? "near-whites only" : "deeper into midtones");
 });
+$("format").addEventListener("change", () => {
+  $("format-hint").textContent = $("format").value === "pq"
+    ? "the one format linkedin keeps — but it ghosts gray in apps that ignore profiles (slack)"
+    : "glows in chrome, edge & phones; looks simply normal everywhere unsupported";
+  convert();
+});
 $("convert").addEventListener("click", convert);
 
 // ---------- reveal room ----------
@@ -558,19 +572,25 @@ async function convert() {
   $("convert").disabled = true;
   $("convert").textContent = "Working…";
   try {
-    const bytes = await luminesce(currentFile, {
-      boost: parseFloat($("boost").value),
-      knee: parseFloat($("knee").value),
-    });
-    const blob = new Blob([bytes], { type: "image/jpeg" });
+    const fmt = $("format").value;
+    const knee = parseFloat($("knee").value);
+    const boost = parseFloat($("boost").value);
+    let bytes, mime, suffix;
+    if (fmt === "pq") {
+      bytes = await luminescePq(currentFile, { knee, nits: 203 + (1000 - 203) * ((boost - 1.1) / (49.26 - 1.1)) + 0 });
+      mime = "image/png";
+      suffix = "-luminescence-linkedin.png";
+    } else {
+      bytes = await luminesce(currentFile, { boost, knee });
+      mime = "image/jpeg";
+      suffix = "-luminescence.jpg";
+    }
+    const blob = new Blob([bytes], { type: mime });
     const url = URL.createObjectURL(blob);
     $("img-after").src = url;
     $("download").href = url;
-    $("download").download = outName;
-    gtag("event", "convert", {
-      boost: parseFloat($("boost").value),
-      knee: parseFloat($("knee").value),
-    });
+    $("download").download = currentFile.name.replace(/\.[^.]*$/, "") + suffix;
+    gtag("event", "convert", { boost, knee, format: fmt });
   } catch (err) {
     alert("Conversion failed: " + err.message);
   } finally {
