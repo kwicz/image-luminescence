@@ -1,5 +1,12 @@
 # image-luminescence
 
+<img src="examples/banner-brightness-up.jpg" alt="TURN YOUR BRIGHTNESS UP" width="760">
+
+<img src="examples/banner-brightness-down.jpg" alt="TURN YOUR BRIGHTNESS DOWN" width="760">
+
+*(Both banners are outputs of this tool. On an HDR display their white
+regions ignore your brightness slider -- try it.)*
+
 Make ordinary images glow on HDR displays -- whites brighter than the
 screen's normal white, staying bright even when the display dims -- while
 keeping every color pixel-exact.
@@ -12,19 +19,12 @@ python3 luminescence.py logo.png
 
 and you get `logo-luminescence.jpg`: an Ultra HDR gain-map JPEG whose base
 image is your original pixels, byte-for-byte, with near-white regions boosted
-up to 4x over standard white on HDR-capable displays (macOS 14+, iOS 17+,
-Chrome, Android). On SDR displays or non-supporting apps it renders as a
+as bright as the viewer's display can go on HDR-capable systems (macOS 14+,
+iOS 17+, Chrome, Android). On SDR displays or non-supporting apps it renders as a
 completely normal image -- the failure mode is "no glow," never "wrong
 colors."
 
 ## Example
-
-These two banners are themselves luminesced -- their white regions glow
-while everything else on your screen obeys the brightness slider:
-
-<img src="examples/banner-brightness-up.jpg" alt="TURN YOUR BRIGHTNESS UP" width="760">
-
-<img src="examples/banner-brightness-down.jpg" alt="TURN YOUR BRIGHTNESS DOWN" width="760">
 
 > [!IMPORTANT]
 > **Turn your screen brightness up and down while looking at this page.**
