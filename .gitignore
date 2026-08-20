@@ -1,0 +1,11 @@
+# generated test fixtures and converted outputs; personal/client artwork
+# stays out of the repo
+*.png
+*.jpg
+*.jpeg
+
+# the reference profile is required by luminescence_pq.py
+!rec2020-pq-reference.icc
+
+.DS_Store
+__pycache__/
