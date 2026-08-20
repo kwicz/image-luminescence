@@ -5,34 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>image-luminescence</title>
 <meta name="description" content="Make your images glow on HDR displays. Free, private, runs entirely in your browser.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
-  <h1>image-luminescence</h1>
-  <p class="banners">
-    <img src="assets/banner-brightness-up.jpg" alt="TURN YOUR BRIGHTNESS UP">
-    <img src="assets/banner-brightness-down.jpg" alt="TURN YOUR BRIGHTNESS DOWN">
-  </p>
-  <p class="tagline">Make your images glow on HDR displays. The banners above
-  are outputs of this tool &mdash; on an HDR screen their whites ignore your
-  brightness slider. Your colors stay pixel-exact; only the whites lift off.</p>
-  <p class="tagline small">Free. No uploads &mdash; everything happens in your
-  browser. <a href="https://github.com/kwicz/image-luminescence">Source on GitHub</a>.</p>
+  <div class="hero">
+    <svg id="orb" width="120" height="120" viewBox="0 0 150 150" role="img"
+         aria-label="image-luminescence mark: a disco orb of dim pink tiles, three tiles glowing white"></svg>
+    <div>
+      <h1 class="display">image-<span class="lumi">luminescence</span></h1>
+      <p class="tagline">Make your images glow on HDR displays.
+      <strong>Your colors stay exactly yours</strong> &mdash; only the whites
+      lift off the screen.</p>
+      <p class="tagline small">Free. No uploads &mdash; everything happens in
+      your browser. <a href="https://github.com/kwicz/image-luminescence">Source on GitHub</a>.</p>
+    </div>
+  </div>
 
   <section id="dropzone" tabindex="0" role="button"
            aria-label="Choose or drop an image to luminesce">
     <p><strong>Drop an image here</strong> or click to choose</p>
-    <p class="small">PNG or JPEG. JPEG bases are kept byte-for-byte.</p>
+    <p class="small">PNG or JPEG &middot; JPEG bases are kept byte-for-byte</p>
     <input type="file" id="file-input" accept="image/png,image/jpeg" hidden>
   </section>
 
   <section id="controls" hidden>
     <label>Glow strength
       <input type="range" id="boost" min="1.1" max="49.26" step="0.01" value="49.26">
-      <span id="boost-label">MAX</span>
+      <span id="boost-label">MAX &middot; 10,000 nits</span>
     </label>
-    <label>Glow threshold (how close to white before a pixel glows)
+    <label>Glow threshold &mdash; how close to white before a pixel glows
       <input type="range" id="knee" min="0.5" max="0.99" step="0.01" value="0.85">
       <span id="knee-label">85%</span>
     </label>
@@ -50,22 +57,62 @@
         <img id="img-after" alt="Luminesced image (glows on HDR displays)">
       </figure>
     </div>
-    <p class="small">If the two look identical, your current display, browser,
-    or brightness setting has no HDR headroom right now &mdash; try Chrome,
-    and try turning your screen brightness down.</p>
+    <p class="small">If the two look identical, your display, browser, or
+    brightness setting has no HDR headroom right now &mdash; try Chrome, and
+    try turning your screen brightness down.</p>
     <a id="download" class="button">Download</a>
   </section>
 
   <footer>
-    <p class="small"><strong>Use it kindly:</strong> luminesced images
-    override the brightness the viewer chose for their screen. It's a
-    for-fun, decorative effect &mdash; great for logos and celebration
-    graphics, unkind behind body text or in places people can't look away
-    from.</p>
+    <div class="card">
+      <p class="small"><strong>Use it kindly.</strong> Luminesced images
+      override the brightness the viewer chose for their screen. It&rsquo;s a
+      for-fun, decorative effect &mdash; great for logos and celebration
+      graphics, unkind behind body text or anywhere people can&rsquo;t look
+      away from.</p>
+    </div>
   </footer>
 </main>
 <script src="app.js"></script>
 <script>
+// Logo mark: disco orb as a pixel grid, three tiles luminesced.
+(function () {
+  const svg = document.getElementById("orb");
+  const NS = "http://www.w3.org/2000/svg";
+  const C = 75, R = 68, T = 11, GAP = 3.5;
+  const dims = ["#3a2a3c", "#4d3350", "#5e3d5c", "#6d4668", "#804f74"];
+  const pinks = ["#8a5474", "#a06288", "#b5719c", "#75577e"];
+  const lit = [[2, -3], [-3, 1], [1, 2]];
+  let seed = 7;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let gy = -6; gy <= 6; gy++) {
+    for (let gx = -6; gx <= 6; gx++) {
+      const x = C + gx * (T + GAP), y = C + gy * (T + GAP);
+      if (Math.hypot(x - C, y - C) > R - T / 2) continue;
+      const rect = document.createElementNS(NS, "rect");
+      rect.setAttribute("x", x - T / 2);
+      rect.setAttribute("y", y - T / 2);
+      rect.setAttribute("width", T);
+      rect.setAttribute("height", T);
+      rect.setAttribute("rx", 2.5);
+      const isLit = lit.some(([lx, ly]) => lx === gx && ly === gy);
+      if (isLit) {
+        rect.setAttribute("fill", "#ffffff");
+        rect.setAttribute("filter", "url(#bloom)");
+      } else {
+        const pool = rand() < 0.4 ? pinks : dims;
+        rect.setAttribute("fill", pool[Math.floor(rand() * pool.length)]);
+      }
+      svg.appendChild(rect);
+    }
+  }
+  const defs = document.createElementNS(NS, "defs");
+  defs.innerHTML = '<filter id="bloom" x="-120%" y="-120%" width="340%" height="340%">' +
+    '<feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffffff" flood-opacity="0.9"/>' +
+    '<feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#e08dba" flood-opacity="0.6"/></filter>';
+  svg.prepend(defs);
+})();
+
 const $ = (id) => document.getElementById(id);
 let currentFile = null;
 let outName = "luminesced.jpg";
@@ -98,7 +145,7 @@ function pick(file) {
 
 $("boost").addEventListener("input", () => {
   const v = parseFloat($("boost").value);
-  $("boost-label").textContent = v >= 49.26 ? "MAX" : v.toFixed(1) + "x";
+  $("boost-label").textContent = v >= 49.26 ? "MAX · 10,000 nits" : v.toFixed(1) + "x over SDR white";
 });
 $("knee").addEventListener("input", () => {
   $("knee-label").textContent = Math.round($("knee").value * 100) + "%";
@@ -108,7 +155,7 @@ $("convert").addEventListener("click", convert);
 async function convert() {
   if (!currentFile) return;
   $("convert").disabled = true;
-  $("convert").textContent = "Working...";
+  $("convert").textContent = "Working…";
   try {
     const bytes = await luminesce(currentFile, {
       boost: parseFloat($("boost").value),
