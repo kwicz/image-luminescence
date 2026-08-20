@@ -16,7 +16,8 @@
 
 - macOS: Preview, Finder/Quick Look, Safari, Chrome — on EDR-capable displays
   (any Apple Silicon MacBook, Pro Display XDR, recent iMacs). Whites render
-  above SDR reference white and stay bright when the screen dims.
+  above SDR reference white and stay bright when the screen dims -- best
+  viewed with screen brightness at about 50%.
 - iOS/iPadOS: Photos, Safari.
 - Chrome (all platforms with an HDR display): honors the PNG `cICP` chunk —
   always pass `--cicp`. On this machine, ColorSync maps cICP files to the

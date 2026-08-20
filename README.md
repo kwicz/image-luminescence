@@ -36,8 +36,8 @@ browser.
 | --- | --- | --- |
 | <img src="examples/disco-ball.png" alt="Original watercolor disco ball" width="250"> | <img src="examples/disco-ball-luminescence.jpg" alt="Gain-map version — glows in HDR browsers" width="250"> | <img src="examples/disco-ball-pq.png" alt="PQ version — glows where profiles survive, ghosts where they don't" width="250"> |
 
-View this page in Chrome on an HDR display, then drag your screen brightness
-down: everything dims except the right image's whites -- the background and
+View this page in Chrome on an HDR display and set your screen brightness
+to about 50%: everything dims except the right image's whites -- the background and
 the grout between tiles hold their intensity. On an SDR screen (or in most
 desktop image viewers) the two look identical, which is exactly the point.
 
@@ -136,8 +136,9 @@ headroom to glow into.
 - Quick self-test: the [live demo](https://kwicz.github.io/image-luminescence/)
   detects your display and reports "glow-ready" or "no hdr headroom" in the
   page footer.
-- Headroom shrinks as screen brightness rises. The glow is strongest on a
-  dimmed screen and can vanish entirely at maximum brightness.
+- Headroom shrinks as screen brightness rises. For the best view, set your
+  screen brightness to about 50% -- the glow is strongest on a dimmed screen
+  and can vanish entirely at maximum brightness.
 
 ## What kind of images work best
 
