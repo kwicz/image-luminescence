@@ -58,8 +58,9 @@ function isoPrimarySegment() {
 
 // Gain-map image: urn + versions + flags + headrooms + 3 channels of
 // (gainMapMin, gainMapMax, gamma, offsetSdr, offsetHdr) as fractions.
-function isoGainmapSegment(boost) {
-  const log2boost = Math.log2(boost);
+// lmins/lmaxs are per-channel log2 gains (may be negative); altHr is the
+// log2 display headroom at which the map is fully applied.
+function isoGainmapMeta(lmins, lmaxs, altHr) {
   const p = new Uint8Array(ISO_URN.length + 4 + 1 + 16 + 3 * 40);
   const dv = new DataView(p.buffer);
   let o = 0;
@@ -70,12 +71,12 @@ function isoGainmapSegment(boost) {
   p[o++] = 0xc0;                        // multichannel | use_base_colour_space
   dv.setUint32(o, 0); o += 4;           // baseHdrHeadroom = 0/1
   dv.setUint32(o, 1); o += 4;
-  dv.setInt32(o, Math.round(log2boost * (1 << 20))); o += 4; // altHdrHeadroom
+  dv.setInt32(o, Math.round(altHr * (1 << 20))); o += 4;
   dv.setUint32(o, 1 << 20); o += 4;
   for (let c = 0; c < 3; c++) {
-    dv.setInt32(o, 0); o += 4;          // gainMapMin = 0/1 (never darken)
-    dv.setUint32(o, 1); o += 4;
-    dv.setInt32(o, Math.round(log2boost * (1 << 20))); o += 4; // gainMapMax
+    dv.setInt32(o, Math.round(lmins[c] * (1 << 20))); o += 4;
+    dv.setUint32(o, 1 << 20); o += 4;
+    dv.setInt32(o, Math.round(lmaxs[c] * (1 << 20))); o += 4;
     dv.setUint32(o, 1 << 20); o += 4;
     dv.setUint32(o, 1); o += 4;         // gamma = 1/1
     dv.setUint32(o, 1); o += 4;
@@ -85,6 +86,11 @@ function isoGainmapSegment(boost) {
     dv.setUint32(o, 0x2de54477); o += 4;
   }
   return jpegSegment(0xe2, p);
+}
+
+function isoGainmapSegment(boost) {
+  const l = Math.log2(boost);
+  return isoGainmapMeta([0, 0, 0], [l, l, l], l);
 }
 
 // ---------- MPF (CIPA DC-007) index for two images ----------
@@ -199,5 +205,89 @@ async function luminesce(fileOrBlob, { boost = MAX_BOOST, knee = 0.85, quality =
   return out;
 }
 
+// Shared container assembly: base JPEG + gain-map JPEG + ISO metadata.
+function assembleUltraHdr(base, gainJpeg, isoGain) {
+  const gainCut = metadataInsertionPoint(gainJpeg);
+  const gainFinal = new Uint8Array(gainJpeg.length + isoGain.length);
+  gainFinal.set(gainJpeg.subarray(0, gainCut), 0);
+  gainFinal.set(isoGain, gainCut);
+  gainFinal.set(gainJpeg.subarray(gainCut), gainCut + isoGain.length);
+
+  const cut = metadataInsertionPoint(base);
+  const isoPrim = isoPrimarySegment();
+  const MPF_LEN = 90;
+  const primaryLen = base.length + isoPrim.length + MPF_LEN;
+  const mpfEndianOffset = cut + isoPrim.length + 8;
+  const mpf = mpfSegment(primaryLen, gainFinal.length, mpfEndianOffset);
+
+  const out = new Uint8Array(primaryLen + gainFinal.length);
+  let w = 0;
+  out.set(base.subarray(0, cut), w); w += cut;
+  out.set(isoPrim, w); w += isoPrim.length;
+  out.set(mpf, w); w += mpf.length;
+  out.set(base.subarray(cut), w); w += base.length - cut;
+  out.set(gainFinal, w);
+  return out;
+}
+
+// HDR reveal: SDR viewers see imageA, HDR viewers see imageB.
+async function reveal(fileA, fileB, { headroom = 2, quality = 0.95 } = {}) {
+  const FLOOR = 8 / 255, CLAMP = 6;
+  const bmpA = await createImageBitmap(fileA);
+  const bmpB = await createImageBitmap(fileB);
+  const w = bmpA.width, h = bmpA.height;
+
+  const draw = (bmp) => {
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bmp, 0, 0, w, h);
+    return { canvas: c, data: ctx.getImageData(0, 0, w, h) };
+  };
+  const A = draw(bmpA), B = draw(bmpB);
+
+  // per-pixel per-channel log2 gain, clamped
+  const n = w * h;
+  const logGain = new Float32Array(n * 3);
+  const OFF = 77 / 0x2de54477;
+  const lmins = [Infinity, Infinity, Infinity];
+  const lmaxs = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < n; i++) {
+    for (let c = 0; c < 3; c++) {
+      const av = srgbEotf(Math.max(A.data.data[i * 4 + c] / 255, FLOOR));
+      const bv = srgbEotf(Math.max(B.data.data[i * 4 + c] / 255, FLOOR));
+      let L = Math.log2((bv + OFF) / (av + OFF));
+      L = Math.min(Math.max(L, -CLAMP), CLAMP);
+      logGain[i * 3 + c] = L;
+      if (L < lmins[c]) lmins[c] = L;
+      if (L > lmaxs[c]) lmaxs[c] = L;
+    }
+  }
+  for (let c = 0; c < 3; c++) {
+    if (lmaxs[c] - lmins[c] < 1e-3) lmaxs[c] = lmins[c] + 1e-3;
+  }
+
+  // normalized multichannel gain map; also lift A's floor in the base
+  const mapData = new ImageData(w, h);
+  for (let i = 0; i < n; i++) {
+    for (let c = 0; c < 3; c++) {
+      const g = (logGain[i * 3 + c] - lmins[c]) / (lmaxs[c] - lmins[c]);
+      mapData.data[i * 4 + c] = Math.round(g * 255);
+      A.data.data[i * 4 + c] = Math.max(A.data.data[i * 4 + c], 8);
+    }
+    mapData.data[i * 4 + 3] = 255;
+    A.data.data[i * 4 + 3] = 255;
+  }
+  A.canvas.getContext("2d").putImageData(A.data, 0, 0);
+
+  const base = await canvasToJpegBytes(A.canvas, quality);
+  const gainJpeg = await canvasToJpegBytes(mapData, 1.0);
+  const iso = isoGainmapMeta(lmins, lmaxs, Math.log2(headroom));
+  return assembleUltraHdr(base, gainJpeg, iso);
+}
+
+window.reveal = reveal;
 window.luminesce = luminesce;
 window.LUMINESCE_MAX_BOOST = MAX_BOOST;

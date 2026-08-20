@@ -273,6 +273,39 @@ nav [data-room].here {
 }
 nav .ext { color: var(--disco); }
 
+/* reveal room */
+.reveal-drops { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.dropzone-mini {
+  padding: 22px 30px;
+  border: 1px dashed var(--dim);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  min-width: 220px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.dropzone-mini.hover, .dropzone-mini:hover, .dropzone-mini:focus-visible {
+  border-color: var(--phosphor);
+  box-shadow: 0 0 26px rgba(224, 141, 186, 0.14);
+  outline: none;
+}
+.dropzone-mini p { margin: 2px 0; }
+.dropzone-mini .small { color: var(--dim); font-size: 0.78rem; }
+#reveal-bench select {
+  background: var(--void);
+  color: var(--ink);
+  border: 1px solid var(--dim);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+}
+#reveal-result { margin: 0; }
+#reveal-result img { max-height: 30vh; border-radius: 10px; background: #fff; display: block; }
+#reveal-result figcaption {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--dim); margin-bottom: 7px;
+}
+
 /* how it works */
 .beats {
   display: grid;

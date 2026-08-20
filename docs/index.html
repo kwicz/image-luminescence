@@ -113,6 +113,7 @@
     </a>
     <h1><a id="wordmark-link" href="#">image-<span class="lumi">luminescence</span></a></h1>
     <nav class="readout" aria-label="Site">
+      <a href="#reveal" data-room="reveal">reveal</a> &middot;
       <a href="#how" data-room="how">how it works</a> &middot;
       <a href="#examples" data-room="examples">examples</a> &middot;
       <a href="#docs" data-room="docs">docs</a><br>
@@ -161,6 +162,46 @@
           <button id="reset" class="ghost" type="button">New image</button>
         </div>
       </div>
+    </section>
+
+    <!-- room: reveal -->
+    <section class="room" id="room-reveal">
+      <div id="reveal-intro">
+        <p class="lede">One file, <em>two</em> pictures.</p>
+        <p class="sub">SDR screens see the first picture. HDR screens see
+        the file become the second. Nobody sees both.</p>
+      </div>
+      <div class="reveal-drops">
+        <div class="dropzone-mini" id="drop-a" tabindex="0" role="button"
+             aria-label="Choose the picture everyone sees">
+          <p><strong>Everyone sees</strong></p>
+          <p class="small" id="name-a">drop or click</p>
+          <input type="file" id="file-a" accept="image/png,image/jpeg" hidden>
+        </div>
+        <div class="dropzone-mini" id="drop-b" tabindex="0" role="button"
+             aria-label="Choose the picture HDR displays reveal">
+          <p><strong>HDR reveals</strong></p>
+          <p class="small" id="name-b">drop or click</p>
+          <input type="file" id="file-b" accept="image/png,image/jpeg" hidden>
+        </div>
+      </div>
+      <div class="bench-row" id="reveal-bench">
+        <label>mode
+          <select id="reveal-mode">
+            <option value="2" selected>switch &middot; flips on HDR displays</option>
+            <option value="6">crossfade &middot; follows the brightness slider</option>
+          </select>
+        </label>
+        <button id="reveal-go" disabled>Reveal</button>
+        <a id="reveal-download" class="button ghost" hidden>Download</a>
+      </div>
+      <figure id="reveal-result" hidden>
+        <figcaption>the file &middot; what you see depends on your display</figcaption>
+        <img id="reveal-img" alt="Reveal result — SDR displays show the first picture, HDR displays the second">
+      </figure>
+      <p class="sub small">The second picture appears at normal brightness
+      &mdash; this is a picture swap, not a flashbang. Thumbnails always
+      show the first picture.</p>
     </section>
 
     <!-- room: how it works -->
@@ -365,7 +406,7 @@ const $ = (id) => document.getElementById(id);
 })();
 
 // ---------- rooms ----------
-const rooms = { home: "room-home", how: "room-how", examples: "room-examples", docs: "room-docs" };
+const rooms = { home: "room-home", reveal: "room-reveal", how: "room-how", examples: "room-examples", docs: "room-docs" };
 
 function showRoom(name) {
   const target = rooms[name] ? name : "home";
@@ -442,6 +483,52 @@ $("knee").addEventListener("input", () => {
     ($("knee").value > 0.8 ? "near-whites only" : "deeper into midtones");
 });
 $("convert").addEventListener("click", convert);
+
+// ---------- reveal room ----------
+const revealFiles = { a: null, b: null };
+for (const k of ["a", "b"]) {
+  const zone = $("drop-" + k), input = $("file-" + k);
+  zone.addEventListener("click", () => input.click());
+  zone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") input.click();
+  });
+  zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("hover"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("hover"));
+  zone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    zone.classList.remove("hover");
+    if (e.dataTransfer.files[0]) pickReveal(k, e.dataTransfer.files[0]);
+  });
+  input.addEventListener("change", () => {
+    if (input.files[0]) pickReveal(k, input.files[0]);
+  });
+}
+function pickReveal(k, file) {
+  revealFiles[k] = file;
+  $("name-" + k).textContent = file.name;
+  $("reveal-go").disabled = !(revealFiles.a && revealFiles.b);
+}
+$("reveal-go").addEventListener("click", async () => {
+  $("reveal-go").disabled = true;
+  $("reveal-go").textContent = "Working…";
+  try {
+    const headroom = parseFloat($("reveal-mode").value);
+    const bytes = await reveal(revealFiles.a, revealFiles.b, { headroom });
+    const url = URL.createObjectURL(new Blob([bytes], { type: "image/jpeg" }));
+    $("reveal-img").src = url;
+    $("reveal-result").hidden = false;
+    const name = revealFiles.a.name.replace(/\.[^.]*$/, "") + "-reveal.jpg";
+    $("reveal-download").href = url;
+    $("reveal-download").download = name;
+    $("reveal-download").hidden = false;
+    gtag("event", "reveal", { headroom });
+  } catch (err) {
+    alert("Reveal failed: " + err.message);
+  } finally {
+    $("reveal-go").disabled = false;
+    $("reveal-go").textContent = "Reveal";
+  }
+});
 
 async function convert() {
   if (!currentFile) return;
