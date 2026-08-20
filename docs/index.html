@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>image-luminescence</title>
+<meta name="description" content="Make your images glow on HDR displays. Free, private, runs entirely in your browser.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>image-luminescence</h1>
+  <p class="banners">
+    <img src="assets/banner-brightness-up.jpg" alt="TURN YOUR BRIGHTNESS UP">
+    <img src="assets/banner-brightness-down.jpg" alt="TURN YOUR BRIGHTNESS DOWN">
+  </p>
+  <p class="tagline">Make your images glow on HDR displays. The banners above
+  are outputs of this tool &mdash; on an HDR screen their whites ignore your
+  brightness slider. Your colors stay pixel-exact; only the whites lift off.</p>
+  <p class="tagline small">Free. No uploads &mdash; everything happens in your
+  browser. <a href="https://github.com/kwicz/image-luminescence">Source on GitHub</a>.</p>
+
+  <section id="dropzone" tabindex="0" role="button"
+           aria-label="Choose or drop an image to luminesce">
+    <p><strong>Drop an image here</strong> or click to choose</p>
+    <p class="small">PNG or JPEG. JPEG bases are kept byte-for-byte.</p>
+    <input type="file" id="file-input" accept="image/png,image/jpeg" hidden>
+  </section>
+
+  <section id="controls" hidden>
+    <label>Glow strength
+      <input type="range" id="boost" min="1.1" max="49.26" step="0.01" value="49.26">
+      <span id="boost-label">MAX</span>
+    </label>
+    <label>Glow threshold (how close to white before a pixel glows)
+      <input type="range" id="knee" min="0.5" max="0.99" step="0.01" value="0.85">
+      <span id="knee-label">85%</span>
+    </label>
+    <button id="convert">Luminesce</button>
+  </section>
+
+  <section id="result" hidden>
+    <div class="compare">
+      <figure>
+        <figcaption>Original</figcaption>
+        <img id="img-before" alt="Original image">
+      </figure>
+      <figure>
+        <figcaption>Luminesced</figcaption>
+        <img id="img-after" alt="Luminesced image (glows on HDR displays)">
+      </figure>
+    </div>
+    <p class="small">If the two look identical, your current display, browser,
+    or brightness setting has no HDR headroom right now &mdash; try Chrome,
+    and try turning your screen brightness down.</p>
+    <a id="download" class="button">Download</a>
+  </section>
+
+  <footer>
+    <p class="small"><strong>Use it kindly:</strong> luminesced images
+    override the brightness the viewer chose for their screen. It's a
+    for-fun, decorative effect &mdash; great for logos and celebration
+    graphics, unkind behind body text or in places people can't look away
+    from.</p>
+  </footer>
+</main>
+<script src="app.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+let currentFile = null;
+let outName = "luminesced.jpg";
+
+$("dropzone").addEventListener("click", () => $("file-input").click());
+$("dropzone").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") $("file-input").click();
+});
+$("dropzone").addEventListener("dragover", (e) => {
+  e.preventDefault();
+  $("dropzone").classList.add("hover");
+});
+$("dropzone").addEventListener("dragleave", () => $("dropzone").classList.remove("hover"));
+$("dropzone").addEventListener("drop", (e) => {
+  e.preventDefault();
+  $("dropzone").classList.remove("hover");
+  if (e.dataTransfer.files[0]) pick(e.dataTransfer.files[0]);
+});
+$("file-input").addEventListener("change", () => {
+  if ($("file-input").files[0]) pick($("file-input").files[0]);
+});
+
+function pick(file) {
+  currentFile = file;
+  outName = file.name.replace(/\.[^.]*$/, "") + "-luminescence.jpg";
+  $("controls").hidden = false;
+  $("img-before").src = URL.createObjectURL(file);
+  convert();
+}
+
+$("boost").addEventListener("input", () => {
+  const v = parseFloat($("boost").value);
+  $("boost-label").textContent = v >= 49.26 ? "MAX" : v.toFixed(1) + "x";
+});
+$("knee").addEventListener("input", () => {
+  $("knee-label").textContent = Math.round($("knee").value * 100) + "%";
+});
+$("convert").addEventListener("click", convert);
+
+async function convert() {
+  if (!currentFile) return;
+  $("convert").disabled = true;
+  $("convert").textContent = "Working...";
+  try {
+    const bytes = await luminesce(currentFile, {
+      boost: parseFloat($("boost").value),
+      knee: parseFloat($("knee").value),
+    });
+    const blob = new Blob([bytes], { type: "image/jpeg" });
+    const url = URL.createObjectURL(blob);
+    $("img-after").src = url;
+    $("download").href = url;
+    $("download").download = outName;
+    $("result").hidden = false;
+  } catch (err) {
+    alert("Conversion failed: " + err.message);
+  } finally {
+    $("convert").disabled = false;
+    $("convert").textContent = "Luminesce";
+  }
+}
+</script>
+</body>
+</html>
