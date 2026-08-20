@@ -19,6 +19,12 @@ colors."
 
 ## Example
 
+> [!IMPORTANT]
+> **Turn your screen brightness up and down while looking at these two
+> images.** Everything dims with your brightness slider -- except the
+> luminesced whites, which hold their intensity and glow harder and harder
+> against the dimming page.
+
 | Original | Luminesced |
 | --- | --- |
 | <img src="examples/disco-ball.png" alt="Original watercolor disco ball" width="380"> | <img src="examples/disco-ball-luminescence.jpg" alt="Glowing version" width="380"> |
@@ -27,12 +33,6 @@ View this page in Chrome (or another Ultra HDR-aware browser) on an HDR
 display: the right image's whites -- the background and the grout between
 tiles -- lift off the page while the watercolor tiles stay true. On an SDR
 screen the two images look identical, which is exactly the point.
-
-**The clearest way to see the difference: turn your screen brightness down.**
-Everything on your screen dims with the brightness slider -- except the
-luminesced image's whites, which hold their intensity and appear to glow
-brighter and brighter against the dimming page. Slide your brightness up and
-down while watching the two images and the effect is unmistakable.
 
 To reproduce: `python3 luminescence.py examples/disco-ball.png`
 
