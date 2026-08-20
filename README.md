@@ -21,7 +21,7 @@ colors."
 
 | Original | Luminesced |
 | --- | --- |
-| ![Original watercolor disco ball](examples/disco-ball.png) | ![Glowing version](examples/disco-ball-luminescence.jpg) |
+| <img src="examples/disco-ball.png" alt="Original watercolor disco ball" width="380"> | <img src="examples/disco-ball-luminescence.jpg" alt="Glowing version" width="380"> |
 
 View this page in Chrome (or another Ultra HDR-aware browser) on an HDR
 display: the right image's whites -- the background and the grout between
@@ -32,24 +32,13 @@ To reproduce: `python3 luminescence.py examples/disco-ball.png`
 
 ### Why this tool exists
 
-The obvious way to make an HDR image -- converting through ICC profiles with
-ImageMagick -- wrecks the colors. Here is the same disco ball through
-`magick in.png -profile sRGB.icc -profile rec2020_pq.icc`:
+Before this tool, there were two ways to attempt an HDR glow, and each ruins
+the image in its own way:
 
-![ImageMagick profile conversion, colors ruined](examples/disco-ball-imagemagick.png)
-
-Pure white comes out as murky green-gray `rgb(123,127,105)`, and every color
-drifts with it.
-
-The other common trick -- tagging untouched sRGB pixels with an HDR profile,
-no conversion -- glows impressively, but reinterprets every color in the
-wrong gamut. The pastel watercolor turns hot neon pink:
-
-![Naive HDR tag, glowing but oversaturated](examples/disco-ball-tagged.png)
-
-(On an HDR display in a profile-aware browser this one really does glow --
-and that saturation shift is the price. Compare its tiles to the original
-above.)
+| ImageMagick ICC profile conversion | Naive HDR profile tag |
+| --- | --- |
+| <img src="examples/disco-ball-imagemagick.png" alt="Colors ruined by profile conversion" width="380"> | <img src="examples/disco-ball-tagged.png" alt="Glowing but oversaturated" width="380"> |
+| `magick in.png -profile sRGB.icc -profile rec2020_pq.icc` rewrites the pixels -- badly. Pure white becomes murky green-gray `rgb(123,127,105)`, every color drifts with it, and there is no glow to show for it. | Untouched sRGB pixels tagged with an HDR profile. This one really glows on an HDR display -- but every color is reinterpreted in the wrong gamut, turning the pastel watercolor hot neon pink. |
 
 This tool exists to do neither: your pixels stay exactly what you authored,
 and the glow rides alongside as gain-map metadata.
