@@ -100,4 +100,34 @@ assert abs(wn.max() - 1000) < 5, "FAIL: white not at peak"
 print("  PASS")
 EOF
 
+echo "== 8. Reveal: SDR shows A, full-headroom decode reconstructs B =="
+magick -size 64x64 gradient:'#CB7AA3'-'#27273a' fixture-a.png
+magick -size 64x64 gradient:'#f5f5dc'-'#0a0a0f' -rotate 90 fixture-b.png
+python3 luminescence_reveal.py fixture-a.png fixture-b.png -o fixture-reveal.jpg > /dev/null
+ultrahdr_app -m 1 -P -j fixture-reveal.jpg | head -1 | grep -q "Yes" || { echo "FAIL: not valid Ultra HDR"; exit 1; }
+ultrahdr_app -m 1 -j fixture-reveal.jpg -o 0 -O 4 -z fixture-reveal-dec.raw > /dev/null 2>&1
+python3 - <<'EOF'
+import numpy as np, sys
+sys.path.insert(0, '.')
+from luminescence_pq import decode_image, srgb_eotf
+
+# base must look like A (with the 8/255 floor lift)
+base, _, _ = decode_image('fixture-reveal.jpg')
+a, _, _ = decode_image('fixture-a.png')
+a_flat = np.maximum(a[..., :3], 8/255)
+err_a = np.abs(base[..., :3] - a_flat).mean() * 255
+print(f"  base vs A: mean err {err_a:.2f}/255")
+assert err_a < 3, "FAIL: base does not match A"
+
+# full decode must reconstruct B
+dec = np.fromfile('fixture-reveal-dec.raw', dtype='<f2').astype(np.float32).reshape(64, 64, 4)[..., :3]
+b, _, _ = decode_image('fixture-b.png')
+b_lin = srgb_eotf(np.maximum(b[..., :3], 8/255))
+err_b = np.abs(dec - b_lin).mean()
+print(f"  decoded vs B: mean linear err {err_b:.4f}")
+assert err_b < 0.02, "FAIL: reveal does not reconstruct B"
+print("  PASS")
+EOF
+rm -f fixture-reveal-dec.raw
+
 echo "ALL TESTS PASSED"

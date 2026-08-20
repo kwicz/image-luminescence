@@ -25,6 +25,7 @@ Source = "https://github.com/kwicz/image-luminescence"
 [project.scripts]
 luminesce = "luminescence:main"
 luminesce-pq = "luminescence_pq:main"
+luminesce-reveal = "luminescence_reveal:main"
 
 [tool.setuptools]
-py-modules = ["luminescence", "luminescence_pq", "luminescence_icc"]
+py-modules = ["luminescence", "luminescence_pq", "luminescence_reveal", "luminescence_icc"]

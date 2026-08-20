@@ -82,6 +82,39 @@ different ways. Pick by where the image is going:
 Rule of thumb: gain-map JPEG unless the destination re-encodes it to
 death AND you've confirmed the PQ PNG renders there.
 
+## HDR reveal: one file, two pictures
+
+`luminescence_reveal.py` pushes the gain map further: instead of boosting
+one image's whites, the map stores the per-pixel ratio *between two
+different images* -- so SDR viewers see picture A while HDR viewers watch
+the file become picture B.
+
+```
+python3 luminescence_reveal.py everyone-sees-this.png hdr-sees-this.png
+```
+
+- `--headroom 2` (default): a clean switch -- SDR world gets A, HDR world
+  gets B. Values below ~2 render unreliably in Chrome.
+- `--headroom 4` to `8`: the reveal becomes a gradual A-to-B crossfade
+  driven by the viewer's brightness slider -- dimming the screen literally
+  fades one picture into the other.
+- Bonus: thumbnails are rendered from the SDR base, so the thumbnail always
+  shows A even where the full view shows B.
+- The revealed image renders at normal brightness (this is a picture swap,
+  not a flashbang), and both images get their black floor lifted to 8/255
+  so the ratios stay encodable.
+
+### See it
+
+<img src="examples/disco-ball-reveal.jpg" alt="On SDR displays: a watercolor disco ball. On HDR displays in Chrome: Aang in the Avatar State." width="380">
+
+What you see above depends on what you're reading this with: on an SDR
+screen (or in a viewer that ignores gain maps) it's the watercolor disco
+ball; in Chrome on an HDR display it's Aang. Same file, same bytes. Even
+the thumbnail and the full view can disagree.
+
+To reproduce: `python3 luminescence_reveal.py examples/disco-ball.png your-hidden-image.jpg`
+
 ## What displays show the glow
 
 Two things must both be true: the *software* applies the gain map (Chrome or
