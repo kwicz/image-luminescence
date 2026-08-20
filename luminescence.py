@@ -66,23 +66,35 @@ def build(input_path, out_path, boost, knee, quality):
     hdr = np.concatenate([linear * gain, np.ones_like(y)], axis=-1)
     hdr.astype(np.float16).tofile(hdr_raw)
 
-    subprocess.run(
-        ["ultrahdr_app", "-m", "0",
-         "-i", base_jpg,               # compressed SDR intent (kept verbatim)
-         "-p", hdr_raw,                # raw HDR intent
-         "-a", "4",                    # rgbahalffloat
-         "-t", "0",                    # linear transfer
-         "-C", "0", "-c", "0",         # bt709 gamut both
-         "-w", str(w), "-h", str(h),
-         "-K", str(float(boost)),      # max content boost recommendation
-         "-L", str(boost * 203.0),     # target peak nits -> hdrCapacityMax
+    # The declared gamut must match any ICC profile embedded in a verbatim
+    # JPEG base (0=bt709/sRGB, 1=display P3, 2=bt2100). The gain map is a
+    # per-pixel ratio, so the same gamut goes on both intents and cancels.
+    last = None
+    for gamut in ("0", "1", "2"):
+        result = subprocess.run(
+            ["ultrahdr_app", "-m", "0",
+             "-i", base_jpg,           # compressed SDR intent (kept verbatim)
+             "-p", hdr_raw,            # raw HDR intent
+             "-a", "4",                # rgbahalffloat
+             "-t", "0",                # linear transfer
+             "-C", gamut, "-c", gamut,
+             "-w", str(w), "-h", str(h),
+             "-K", str(float(boost)),  # max content boost recommendation
+             "-L", str(boost * 203.0), # target peak nits -> hdrCapacityMax
                                        # equals boost (full glow at boost x
                                        # headroom, not at an assumed 10k nits)
-         "-Q", str(quality),
-         "-z", out_path],
-        check=True, capture_output=True, text=True,
-    )
-    print(f"{out_path}: {w}x{h}, base sRGB JPEG q{quality}, "
+             "-Q", str(quality),
+             "-z", out_path],
+            capture_output=True, text=True,
+        )
+        last = result
+        if result.returncode == 0:
+            break
+        if "does not match with color gamut" not in result.stdout + result.stderr:
+            break
+    if last.returncode != 0:
+        sys.exit("encoder failed: " + (last.stdout + last.stderr).strip()[-300:])
+    print(f"{out_path}: {w}x{h}, base JPEG q{quality} (gamut {gamut}), "
           f"whites boost up to {boost:g}x over SDR white")
 
 
