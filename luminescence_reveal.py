@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""HDR reveal: one file, two pictures.
+"""image-reveal: one file, two pictures.
 
 Packs two images into an Ultra HDR (ISO 21496-1) gain-map JPEG so that
 SDR viewers see image A while HDR-capable viewers (Chrome/Edge on an HDR
@@ -180,7 +180,7 @@ def main():
                          "in Chrome)")
     ap.add_argument("--quality", type=int, default=95)
     args = ap.parse_args()
-    out = args.output or os.path.splitext(args.sdr)[0] + "-reveal.jpg"
+    out = args.output or os.path.splitext(args.sdr)[0] + "-image-reveal.jpg"
     build(args.sdr, args.hdr, out, args.headroom, args.quality)
 
 

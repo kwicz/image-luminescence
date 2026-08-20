@@ -167,6 +167,19 @@ h1 .lumi {
   display: block;
 }
 .compare.compact img { max-height: 22vh; }
+.compare.compact figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+.compare.compact figcaption { margin-bottom: 0; }
+#home-examples, #reveal-examples {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
 #room-examples .compare:not(.compact) img { max-height: 30vh; }
 
 .bench-row {

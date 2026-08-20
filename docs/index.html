@@ -113,9 +113,8 @@
     </a>
     <h1><a id="wordmark-link" href="#">image-<span class="lumi">luminescence</span></a></h1>
     <nav class="readout" aria-label="Site">
-      <a href="#reveal" data-room="reveal">reveal</a> &middot;
+      <a href="#reveal" data-room="reveal">image-reveal</a> &middot;
       <a href="#how" data-room="how">how it works</a> &middot;
-      <a href="#examples" data-room="examples">examples</a> &middot;
       <a href="#docs" data-room="docs">docs</a><br>
       <a href="https://github.com/kwicz/image-luminescence" class="ext">source on github</a>
     </nav>
@@ -135,6 +134,26 @@
         <p><strong>Drop an image</strong> or click to choose</p>
         <p class="small">png or jpeg &middot; jpeg bases kept byte-for-byte</p>
         <input type="file" id="file-input" accept="image/png,image/jpeg" hidden>
+      </div>
+
+      <div id="home-examples">
+        <p class="sub small">Set your screen brightness to about 50% &mdash;
+        in Chrome on an HDR display the two converted versions below keep
+        their whites lit while everything else dims.</p>
+        <div class="compare compact">
+          <figure>
+            <figcaption>original</figcaption>
+            <img src="assets/disco-ball.png" alt="Watercolor disco ball, original">
+          </figure>
+          <figure>
+            <figcaption>gain-map jpeg &middot; the default</figcaption>
+            <img src="assets/disco-ball-luminescence.jpg" alt="Luminesced — glows on HDR displays">
+          </figure>
+          <figure>
+            <figcaption>pq png &middot; for pipelines like linkedin</figcaption>
+            <img src="assets/disco-ball-pq.png" alt="PQ version — glows where color profiles survive">
+          </figure>
+        </div>
       </div>
 
       <div id="workbench" hidden>
@@ -199,9 +218,25 @@
         <figcaption>the file &middot; what you see depends on your display</figcaption>
         <img id="reveal-img" alt="Reveal result — SDR displays show the first picture, HDR displays the second">
       </figure>
-      <p class="sub small">The second picture appears at normal brightness
-      &mdash; this is a picture swap, not a flashbang. Thumbnails always
-      show the first picture.</p>
+      <div id="reveal-examples">
+        <p class="sub small">The third image below is one file built from the
+        other two &mdash; what it shows depends on the screen reading it.
+        Thumbnails always show the first.</p>
+        <div class="compare compact">
+          <figure>
+            <figcaption>everyone sees</figcaption>
+            <img src="assets/disco-ball.png" alt="Reveal ingredient A: the disco ball">
+          </figure>
+          <figure>
+            <figcaption>hdr reveals</figcaption>
+            <img src="assets/aang.jpg" alt="Reveal ingredient B">
+          </figure>
+          <figure>
+            <figcaption>the file &middot; same bytes</figcaption>
+            <img src="assets/disco-ball-reveal.jpg" alt="One file that shows A on SDR displays and B on HDR displays">
+          </figure>
+        </div>
+      </div>
     </section>
 
     <!-- room: how it works -->
@@ -254,46 +289,6 @@
       </div>
     </section>
 
-    <!-- room: examples -->
-    <section class="room" id="room-examples">
-      <div class="compare">
-        <figure>
-          <figcaption>original</figcaption>
-          <img src="assets/disco-ball.png" alt="Watercolor disco ball, original">
-        </figure>
-        <figure>
-          <figcaption>gain-map jpeg &middot; the default</figcaption>
-          <img src="assets/disco-ball-luminescence.jpg" alt="Watercolor disco ball, luminesced — glows on HDR displays">
-        </figure>
-        <figure>
-          <figcaption>pq png &middot; for pipelines like linkedin</figcaption>
-          <img src="assets/disco-ball-pq.png" alt="PQ version — glows where color profiles survive; looks washed out in viewers that ignore them">
-        </figure>
-      </div>
-      <p class="sub"><strong>Now set your screen brightness to about 50%.</strong>
-      Everything dims except the luminesced whites &mdash; the grout between
-      tiles holds its intensity like it&rsquo;s lit from behind. Converted
-      files glow <em>in the browser</em> &mdash; Chrome is the sure thing;
-      desktop image viewers often show correct colors without the boost.</p>
-      <div class="compare compact">
-        <figure>
-          <figcaption>everyone sees</figcaption>
-          <img src="assets/disco-ball.png" alt="Reveal ingredient A: the disco ball">
-        </figure>
-        <figure>
-          <figcaption>hdr reveals</figcaption>
-          <img src="assets/aang.jpg" alt="Reveal ingredient B">
-        </figure>
-        <figure>
-          <figcaption>the reveal file &middot; same bytes</figcaption>
-          <img src="assets/disco-ball-reveal.jpg" alt="One file that shows A on SDR displays and B on HDR displays">
-        </figure>
-      </div>
-      <p class="sub small">The third image is one file built from the other
-      two &mdash; what it shows depends on the screen reading it. Make your
-      own in the <a href="#reveal">reveal room</a>.</p>
-    </section>
-
     <!-- room: docs -->
     <section class="room" id="room-docs">
       <p class="lede">Take it <em>home</em>.</p>
@@ -319,7 +314,7 @@ python3 luminescence.py logo.png
           &mdash; how those glowing company icons work), but viewers that
           ignore the profile show a washed-out ghost (Slack). Only for
           destinations you&rsquo;ve verified.
-          <code>luminescence_reveal.py</code> packs <em>two different
+          <code>image-reveal</code> (luminescence_reveal.py) packs <em>two different
           pictures</em> into one file: SDR viewers see the first, HDR
           viewers see the file become the second. One artifact of the
           format nobody else is using.</p>
@@ -424,7 +419,7 @@ const $ = (id) => document.getElementById(id);
 })();
 
 // ---------- rooms ----------
-const rooms = { home: "room-home", reveal: "room-reveal", how: "room-how", examples: "room-examples", docs: "room-docs" };
+const rooms = { home: "room-home", reveal: "room-reveal", how: "room-how", examples: "room-home", docs: "room-docs" };
 
 function showRoom(name) {
   const target = rooms[name] ? name : "home";
@@ -477,6 +472,7 @@ function pick(file) {
   outName = file.name.replace(/\.[^.]*$/, "") + "-luminescence.jpg";
   $("intro").hidden = true;
   $("dropzone").hidden = true;
+  $("home-examples").hidden = true;
   $("workbench").hidden = false;
   $("img-before").src = URL.createObjectURL(file);
   convert();
@@ -489,6 +485,7 @@ $("reset").addEventListener("click", () => {
   $("workbench").hidden = true;
   $("intro").hidden = false;
   $("dropzone").hidden = false;
+  $("home-examples").hidden = false;
   $("file-input").value = "";
 });
 
@@ -534,8 +531,9 @@ $("reveal-go").addEventListener("click", async () => {
     const bytes = await reveal(revealFiles.a, revealFiles.b, { headroom });
     const url = URL.createObjectURL(new Blob([bytes], { type: "image/jpeg" }));
     $("reveal-img").src = url;
+    $("reveal-examples").hidden = true;
     $("reveal-result").hidden = false;
-    const name = revealFiles.a.name.replace(/\.[^.]*$/, "") + "-reveal.jpg";
+    const name = revealFiles.a.name.replace(/\.[^.]*$/, "") + "-image-reveal.jpg";
     $("reveal-download").href = url;
     $("reveal-download").download = name;
     $("reveal-download").hidden = false;

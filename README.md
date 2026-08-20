@@ -82,9 +82,9 @@ different ways. Pick by where the image is going:
 Rule of thumb: gain-map JPEG unless the destination re-encodes it to
 death AND you've confirmed the PQ PNG renders there.
 
-## HDR reveal: one file, two pictures
+## image-reveal: one file, two pictures
 
-`luminescence_reveal.py` pushes the gain map further: instead of boosting
+**image-reveal** (`luminescence_reveal.py`) pushes the gain map further: instead of boosting
 one image's whites, the map stores the per-pixel ratio *between two
 different images* -- so SDR viewers see picture A while HDR viewers watch
 the file become picture B.
@@ -117,7 +117,7 @@ becomes the second. Same bytes either way -- even its thumbnail and its
 full view can disagree.
 
 To reproduce: `python3 luminescence_reveal.py examples/disco-ball.png examples/aang.jpg`
-Or use the [reveal room on the site](https://kwicz.github.io/image-luminescence/#reveal).
+Or use [image-reveal on the site](https://kwicz.github.io/image-luminescence/#reveal).
 
 ## What displays show the glow
 
