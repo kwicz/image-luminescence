@@ -19,11 +19,18 @@ colors."
 
 ## Example
 
+These two banners are themselves luminesced -- their white regions glow
+while everything else on your screen obeys the brightness slider:
+
+<img src="examples/banner-brightness-up.jpg" alt="TURN YOUR BRIGHTNESS UP" width="760">
+
+<img src="examples/banner-brightness-down.jpg" alt="TURN YOUR BRIGHTNESS DOWN" width="760">
+
 > [!IMPORTANT]
-> **Turn your screen brightness up and down while looking at these two
-> images.** Everything dims with your brightness slider -- except the
-> luminesced whites, which hold their intensity and glow harder and harder
-> against the dimming page.
+> **Turn your screen brightness up and down while looking at this page.**
+> Everything dims with your brightness slider -- except the luminesced
+> whites, which hold their intensity and glow harder and harder against
+> the dimming page.
 
 | Original | Luminesced |
 | --- | --- |
