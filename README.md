@@ -106,14 +106,18 @@ python3 luminescence_reveal.py everyone-sees-this.png hdr-sees-this.png
 
 ### See it
 
-<img src="examples/disco-ball-reveal.jpg" alt="On SDR displays: a watercolor disco ball. On HDR displays in Chrome: Aang in the Avatar State." width="380">
+| Everyone sees | HDR displays reveal | The reveal file |
+| --- | --- | --- |
+| <img src="examples/disco-ball.png" alt="Picture A: watercolor disco ball" width="250"> | <img src="examples/aang.jpg" alt="Picture B: Aang in the Avatar State" width="250"> | <img src="examples/disco-ball-reveal.jpg" alt="One file: shows the disco ball on SDR displays, Aang on HDR displays" width="250"> |
 
-What you see above depends on what you're reading this with: on an SDR
-screen (or in a viewer that ignores gain maps) it's the watercolor disco
-ball; in Chrome on an HDR display it's Aang. Same file, same bytes. Even
-the thumbnail and the full view can disagree.
+The first two are ordinary images -- the ingredients. The third is one
+file made from both: on an SDR screen (or in a viewer that ignores gain
+maps) it looks identical to the first; in Chrome on an HDR display it
+becomes the second. Same bytes either way -- even its thumbnail and its
+full view can disagree.
 
-To reproduce: `python3 luminescence_reveal.py examples/disco-ball.png your-hidden-image.jpg`
+To reproduce: `python3 luminescence_reveal.py examples/disco-ball.png examples/aang.jpg`
+Or use the [reveal room on the site](https://kwicz.github.io/image-luminescence/#reveal).
 
 ## What displays show the glow
 

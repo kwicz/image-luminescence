@@ -165,6 +165,8 @@ h1 .lumi {
   background: #fff;
   display: block;
 }
+.compare.compact img { max-height: 22vh; }
+#room-examples .compare:not(.compact) img { max-height: 30vh; }
 
 .bench-row {
   display: flex;
