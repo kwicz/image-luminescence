@@ -100,6 +100,9 @@ python3 luminescence_reveal.py everyone-sees-this.png hdr-sees-this.png
   fades one picture into the other.
 - Bonus: thumbnails are rendered from the SDR base, so the thumbnail always
   shows A even where the full view shows B.
+- Reveals need the gain map to survive, so re-encoding pipelines (LinkedIn,
+  Slack) show only picture A. Share the file directly or host it yourself;
+  it renders in Chrome/Edge on HDR displays, Android, and iOS Photos.
 - The revealed image renders at normal brightness (this is a picture swap,
   not a flashbang), and both images get their black floor lifted to 8/255
   so the ratios stay encodable.
